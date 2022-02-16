@@ -9,6 +9,7 @@
 AIManager::AIManager()
 {
 	m_pCar = nullptr;
+    m_pCar2 = nullptr;
 }
 
 AIManager::~AIManager()
@@ -28,6 +29,9 @@ void AIManager::release()
 
 	delete m_pCar;
 	m_pCar = nullptr;
+
+    delete m_pCar2;
+    m_pCar2 = nullptr;
 }
 
 HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
@@ -36,15 +40,25 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
     float xPos = -500; // an abtrirary start point
     float yPos = 300;
 
+    //second vehicle pos
+    float xPos2 = 500;
+    float yPos2 = -300;
+
     m_pCar = new Vehicle();
     HRESULT hr = m_pCar->initMesh(pd3dDevice, carColour::blueCar);
     m_pCar->setVehiclePosition(Vector2D(xPos, yPos));
     if (FAILED(hr))
         return hr;
 
+    m_pCar2 = new Vehicle();
+    hr = m_pCar2->initMesh(pd3dDevice, carColour::redCar);
+    if (FAILED(hr))
+        return hr;
+
     // setup the waypoints
     m_waypointManager.createWaypoints(pd3dDevice);
     m_pCar->setWaypointManager(&m_waypointManager);
+    m_pCar2->setWaypointManager(&m_waypointManager);
 
     // create a passenger pickup item
     PickupItem* pPickupPassenger = new PickupItem();
@@ -100,6 +114,19 @@ void AIManager::update(const float fDeltaTime)
 		checkForCollisions();
 		AddItemToDrawList(m_pCar);
 	}
+    if (m_pCar2 != nullptr)
+    {
+        m_pCar2->update(fDeltaTime);
+        checkForCollisions();
+        AddItemToDrawList(m_pCar2);
+
+        if (m_wander)
+            keyDown(87);
+        if (m_seeking)
+            keyDown(83);
+        if (m_fleeing)
+            keyDown(70);
+    }
 }
 
 void AIManager::mouseUp(int x, int y)
@@ -131,8 +158,11 @@ void AIManager::keyDown(WPARAM param)
 	// hint 65-90 are a-z
     const WPARAM key_space = 32;
 	const WPARAM key_a = 65;
+    const WPARAM key_f = 70;
+    const WPARAM key_r = 82;
 	const WPARAM key_s = 83;
     const WPARAM key_t = 84;
+    const WPARAM key_w = 87;
 
     switch (param)
     {
@@ -161,12 +191,57 @@ void AIManager::keyDown(WPARAM param)
             OutputDebugStringA("a Down \n");
             break;
         }
+        case key_f: 
+        {
+            m_fleeing = true;
+            m_seeking = false;
+            m_wander = false;
+
+            Vector2D length;
+            length.x = (m_pCar2->getPosition().x - m_pCar->getPosition().x);
+            length.y = (m_pCar2->getPosition().y - m_pCar->getPosition().y);
+
+            if (length.Length() <= 250)
+                m_pCar2->setPositionTo(m_pCar->getPosition() - m_pCar2->getPosition());
+
+            m_fleeing = false;
+            m_wander = true;
+
+            break;
+        }
+        case key_r: 
+        {
+            break;
+        }
 		case key_s:
 		{
+            m_seeking = true;
+            m_wander = false;
+            m_fleeing = false;
+
+            m_pCar2->setPositionTo(m_pCar->getPosition());
 			break;
 		}
         case key_t:
 		{
+            break;
+        }
+        case key_w:
+        {
+            m_wander = true;
+            m_seeking = false;
+            m_fleeing = false;
+
+            if (m_pCar2->getCurrentSpeed() == 0.0f)
+            {
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+
+                Waypoint* wp = m_waypointManager.getNearestWaypoint(Vector2D(x, y));
+
+                m_pCar2->setPositionTo(wp->getPosition());
+            }
+
             break;
         }
         // etc

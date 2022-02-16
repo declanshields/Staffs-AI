@@ -19,9 +19,8 @@ HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 
 	HRESULT hr = DrawableGameObject::initMesh(pd3dDevice);
 
-	//m_maxSpeed = NORMAL_MAX_SPEED;
-	m_maxSpeed = DOUBLE_MAX_SPEED;
-	m_currentSpeed = m_maxSpeed;
+	m_maxSpeed = NORMAL_MAX_SPEED;
+	m_currentSpeed = 0;
 	setVehiclePosition(Vector2D(0, 0));
 
 	m_lastPosition = Vector2D(0, 0);
@@ -33,12 +32,17 @@ void Vehicle::update(const float deltaTime)
 {
 	// consider replacing with force based acceleration / velocity calculations
 	Vector2D vecTo = m_positionTo - m_currentPosition;
-	float velocity = deltaTime * m_currentSpeed;
+	float velocity = 0;
 
 	float length = (float)vecTo.Length();
 	// if the distance to the end point is less than the car would move, then only move that distance. 
 	if (length > 0) {
 		vecTo.Normalize();
+		velocity = m_currentSpeed + (deltaTime * 2.5f);
+
+		if (velocity >= m_maxSpeed)
+			velocity = m_maxSpeed;
+
 		if(length > velocity)
 			vecTo *= velocity;
 		else
@@ -54,6 +58,7 @@ void Vehicle::update(const float deltaTime)
 		m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
 	}
 	m_lastPosition = m_currentPosition;
+	m_currentSpeed = velocity;
 
 	// set the current poistion for the drawablegameobject
 	setPosition(Vector2D(m_currentPosition));
@@ -67,7 +72,7 @@ void Vehicle::setCurrentSpeed(const float speed)
 {
 	m_currentSpeed = m_maxSpeed * speed;
 	m_currentSpeed = max(0, m_currentSpeed);
-	m_currentSpeed = min(1, m_currentSpeed);
+	m_currentSpeed = min(m_maxSpeed, m_currentSpeed);
 }
 
 // set a position to move to

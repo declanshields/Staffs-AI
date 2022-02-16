@@ -25,7 +25,7 @@ public:
 	void setWaypointManager(WaypointManager* wpm);
 	void hasCollided() {}
 
-
+	float getCurrentSpeed() { return m_currentSpeed; }
 
 protected: // protected methods
 

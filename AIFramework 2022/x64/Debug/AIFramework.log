@@ -1,2 +1,4 @@
 ﻿  AIManager.cpp
-  AIFramework.vcxproj -> C:\Users\s011459k\OneDrive - Staffordshire University\AI\AIFramework 2022\x64\Debug\AIFramework.exe
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(45,11): warning C4189: 'yPos2': local variable is initialized but not referenced
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(44,11): warning C4189: 'xPos2': local variable is initialized but not referenced
+  AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
