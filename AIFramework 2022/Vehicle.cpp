@@ -95,6 +95,7 @@ void Vehicle::setVehiclePosition(Vector2D position)
 void Vehicle::setWaypointManager(WaypointManager* wpm)
 {
 	m_waypointManager = wpm;
+	m_pathfinding = new Pathfinding(wpm);
 }
 
 

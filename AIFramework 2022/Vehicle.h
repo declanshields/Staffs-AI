@@ -1,9 +1,9 @@
 #pragma once
 
 #include "DrawableGameObject.h"
-#include "WaypointManager.h"
 #include "Vector2D.h"
 #include "Collidable.h"
+#include "Pathfinding.h"
 
 
 enum class carColour
@@ -26,6 +26,7 @@ public:
 	void hasCollided() {}
 
 	float getCurrentSpeed() { return m_currentSpeed; }
+	Pathfinding* GetPathfinderManager() { return m_pathfinding; }
 
 protected: // protected methods
 
@@ -39,6 +40,6 @@ protected: // preotected properties
 	Vector2D m_positionTo;
 	Vector2D m_lastPosition;
 	WaypointManager* m_waypointManager;
-
+	Pathfinding* m_pathfinding;
 };
 

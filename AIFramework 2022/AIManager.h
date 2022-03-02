@@ -30,8 +30,11 @@ private:
 	Vehicle*                m_pCar2 = nullptr;
 	WaypointManager			m_waypointManager;
 
+	vector<Waypoint*> m_path;
+
 	bool m_seeking = false;
 	bool m_fleeing = false;
 	bool m_wander = true;
+	bool m_clear = false;
 };
 

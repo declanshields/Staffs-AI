@@ -127,6 +127,14 @@ void AIManager::update(const float fDeltaTime)
         if (m_fleeing)
             keyDown(70);
     }
+
+    if (!m_path.empty())
+    {
+        for (Waypoint* wps : m_path)
+        {
+            AddItemToDrawList(wps);
+        }
+    }
 }
 
 void AIManager::mouseUp(int x, int y)
@@ -196,16 +204,31 @@ void AIManager::keyDown(WPARAM param)
             m_fleeing = true;
             m_seeking = false;
             m_wander = false;
+            m_path.clear();
 
             Vector2D length;
             length.x = (m_pCar2->getPosition().x - m_pCar->getPosition().x);
             length.y = (m_pCar2->getPosition().y - m_pCar->getPosition().y);
 
             if (length.Length() <= 250)
+            {
                 m_pCar2->setPositionTo(m_pCar->getPosition() - m_pCar2->getPosition());
-
-            m_fleeing = false;
-            m_wander = true;
+                m_fleeing = true;
+            }
+            else
+            {
+                if(length.Length() >= 500)
+                {
+                    m_fleeing = false;
+                    m_seeking = true;
+                }
+                else
+                {
+                    m_fleeing = false;
+                    m_seeking = false;
+                    m_wander = true;
+                }
+            }
 
             break;
         }
@@ -218,6 +241,8 @@ void AIManager::keyDown(WPARAM param)
             m_seeking = true;
             m_wander = false;
             m_fleeing = false;
+
+            m_path.clear();
 
             m_pCar2->setPositionTo(m_pCar->getPosition());
 			break;
@@ -232,15 +257,27 @@ void AIManager::keyDown(WPARAM param)
             m_seeking = false;
             m_fleeing = false;
 
-            if (m_pCar2->getCurrentSpeed() == 0.0f)
+            if (m_path.empty())
             {
+
                 int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
                 int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
 
-                Waypoint* wp = m_waypointManager.getNearestWaypoint(Vector2D(x, y));
+                Vector2D endPos = Vector2D(x, y);
 
-                m_pCar2->setPositionTo(wp->getPosition());
+                m_path = m_pCar2->GetPathfinderManager()->BreadthFirst(m_pCar2->getPosition(), endPos);
             }
+
+            if (m_pCar2->getCurrentSpeed() == 0.0f)
+            {
+                if (m_path.size() > 0)
+                {
+                    Waypoint* nextPoint = m_path[m_path.size() - 1];
+                    m_pCar2->setPositionTo(nextPoint->getPosition());
+                }
+            }
+            if (m_pCar2->getPosition() == m_path[m_path.size() - 1]->getPosition())
+                m_path.pop_back();
 
             break;
         }
