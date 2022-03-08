@@ -30,35 +30,79 @@ HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 
 void Vehicle::update(const float deltaTime)
 {
-	// consider replacing with force based acceleration / velocity calculations
-	Vector2D vecTo = m_positionTo - m_currentPosition;
-	float velocity = 0;
+	//// consider replacing with force based acceleration / velocity calculations
+	//Vector2D vecTo = m_positionTo - m_currentPosition;
+	//float velocity = 0;
 
-	float length = (float)vecTo.Length();
-	// if the distance to the end point is less than the car would move, then only move that distance. 
-	if (length > 0) {
+	//float length = (float)vecTo.Length();
+	//// if the distance to the end point is less than the car would move, then only move that distance. 
+	//if (length > 0) {
+	//	vecTo.Normalize();
+	//	velocity = m_currentSpeed + (deltaTime * 2.5f);
+
+	//	if (velocity >= m_maxSpeed)
+	//		velocity = m_maxSpeed;
+
+	//	if(length > velocity)
+	//		vecTo *= velocity;
+	//	else
+	//		vecTo *= length;
+
+	//	m_currentPosition += vecTo;
+	//}
+
+	//// rotate the object based on its last & current position
+	//Vector2D diff = m_currentPosition - m_lastPosition;
+	//if (diff.Length() > 0) { // if zero then don't update rotation
+	//	diff.Normalize();
+	//	m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
+	//}
+	//m_lastPosition = m_currentPosition;
+	//m_currentSpeed = velocity;
+
+	//force based movement
+	Vector2D acceleration = m_totalForce / m_mass;
+	m_velocity += acceleration * deltaTime;
+	m_currentPosition += m_velocity * deltaTime;
+
+	switch(m_currentState)
+	{
+	case state::Seek:
+		{
+		Vector2D vecTo = m_positionTo - m_currentPosition;
 		vecTo.Normalize();
-		velocity = m_currentSpeed + (deltaTime * 2.5f);
+		vecTo *= m_maxSpeed;
 
-		if (velocity >= m_maxSpeed)
-			velocity = m_maxSpeed;
+		m_totalForce += (vecTo - m_velocity);
+		break;
+		}
+	case state::Flee:
+		{
+		Vector2D vecTo = m_currentPosition - m_positionTo;
+		vecTo.Normalize();
+		if (vecTo.Length() >= 250.0f)
+		{
+			vecTo *= m_maxSpeed;
 
-		if(length > velocity)
-			vecTo *= velocity;
-		else
-			vecTo *= length;
+			m_totalForce += (vecTo - m_velocity);
+		}
+		break;
+		}
+	case state::Arrive:
+		{
+		Vector2D vecTo = m_positionTo - m_currentPosition;
+		vecTo.Normalize();
+		float speed = vecTo.Length() * m_deceleration;
 
-		m_currentPosition += vecTo;
+		vecTo = (vecTo * speed) / vecTo.Length();
+		m_totalForce += (vecTo - m_velocity);
+		break;
+		}
+	case state::Pursuit:
+		{
+		break;
+		}
 	}
-
-	// rotate the object based on its last & current position
-	Vector2D diff = m_currentPosition - m_lastPosition;
-	if (diff.Length() > 0) { // if zero then don't update rotation
-		diff.Normalize();
-		m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
-	}
-	m_lastPosition = m_currentPosition;
-	m_currentSpeed = velocity;
 
 	// set the current poistion for the drawablegameobject
 	setPosition(Vector2D(m_currentPosition));

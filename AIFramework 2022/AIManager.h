@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WaypointManager.h"
+#include <chrono>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ public:
 	void	keyUp(WPARAM param);
 
 protected:
-	bool	checkForCollisions();
+	bool	checkForCollisions(Vehicle* car);
 	void	setRandomPickupPosition(PickupItem* pickup);
 
 private:
@@ -30,11 +31,22 @@ private:
 	Vehicle*                m_pCar2 = nullptr;
 	WaypointManager			m_waypointManager;
 
+	float m_deceleration = 0.5f;
+
 	vector<Waypoint*> m_path;
 
-	bool m_seeking = false;
-	bool m_fleeing = false;
-	bool m_wander = true;
+	bool m_blueSeeking = false;
+	bool m_blueArriving = false;
+	bool m_bluePursuit = false;
+	bool m_blueFlee = false;
+	bool m_blueObstacleAvoid = false;
+
+	bool m_redWander = false;
+
+	bool m_pathfinding = false;
 	bool m_clear = false;
+
+	//time points to store the start and end points of the timer
+	chrono::time_point<chrono::system_clock> start, end;
 };
 
