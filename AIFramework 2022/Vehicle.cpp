@@ -51,12 +51,6 @@ void Vehicle::update(const float deltaTime)
 	//	m_currentPosition += vecTo;
 	//}
 
-	//// rotate the object based on its last & current position
-	//Vector2D diff = m_currentPosition - m_lastPosition;
-	//if (diff.Length() > 0) { // if zero then don't update rotation
-	//	diff.Normalize();
-	//	m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
-	//}
 	//m_lastPosition = m_currentPosition;
 	//m_currentSpeed = velocity;
 
@@ -105,12 +99,22 @@ void Vehicle::update(const float deltaTime)
 		break;
 	}
 
-	//setPosition(Vector2D(m_currentPosition));
+	m_lastPosition     = m_currentPosition;
+
 	m_acceleration     = m_steeringForce / m_mass;
 	m_velocity        += m_acceleration * deltaTime;
 	m_velocity.Truncate(m_maxSpeed);
 	m_currentPosition += (m_velocity * deltaTime);
+	
 	setPosition(Vector2D(m_currentPosition));
+
+	// rotate the object based on its last & current position
+	Vector2D diff = m_currentPosition - m_lastPosition;
+	if (diff.Length() > 0) { // if zero then don't update rotation
+		diff.Normalize();
+		m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
+	}
+
 	DrawableGameObject::update(deltaTime);
 }
 

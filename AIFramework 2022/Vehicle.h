@@ -39,6 +39,8 @@ public:
 	void            hasCollided() {}
 
 	float           getCurrentSpeed()      { return m_currentSpeed; }
+	float           getMaxSpeed()          { return m_maxSpeed; }
+	Vector2D        getVelocity()          { return m_velocity; }
 	Pathfinding*    GetPathfinderManager() { return m_pathfinding; }
 
 	//function for setting state

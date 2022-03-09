@@ -368,6 +368,7 @@
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="MovementManager.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="PickupItem.cpp" />
     <ClCompile Include="Vehicle.cpp" />
@@ -385,6 +386,7 @@
     <ClInclude Include="main.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="MovementManager.h" />
     <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="PickupItem.h" />
     <CLInclude Include="resource.h" />
