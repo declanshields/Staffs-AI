@@ -1,6 +1,6 @@
 #include "Vehicle.h"
 
-#define HALF_MAX_SPEED 100
+#define HALF_MAX_SPEED   100
 #define NORMAL_MAX_SPEED 200
 #define DOUBLE_MAX_SPEED 400
 
@@ -17,9 +17,9 @@ HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 		setTextureName(L"Resources\\car_blue.dds");
 	}
 
-	HRESULT hr = DrawableGameObject::initMesh(pd3dDevice);
+	HRESULT hr     = DrawableGameObject::initMesh(pd3dDevice);
 
-	m_maxSpeed = NORMAL_MAX_SPEED;
+	m_maxSpeed     = NORMAL_MAX_SPEED;
 	m_currentSpeed = 0;
 	setVehiclePosition(Vector2D(0, 0));
 
@@ -60,53 +60,57 @@ void Vehicle::update(const float deltaTime)
 	//m_lastPosition = m_currentPosition;
 	//m_currentSpeed = velocity;
 
-	//force based movement
-	Vector2D acceleration = m_totalForce / m_mass;
-	m_velocity += acceleration * deltaTime;
-	m_currentPosition += m_velocity * deltaTime;
+	//// set the current poistion for the drawablegameobject
+	//setPosition(Vector2D(m_currentPosition));
 
-	switch(m_currentState)
+	//DrawableGameObject::update(deltaTime);
+
+	//force based movement
+	Vector2D m_steeringForce;
+	Vector2D m_acceleration;
+
+	switch (m_currentState)
 	{
 	case state::Seek:
-		{
-		Vector2D vecTo = m_positionTo - m_currentPosition;
-		vecTo.Normalize();
-		vecTo *= m_maxSpeed;
-
-		m_totalForce += (vecTo - m_velocity);
+	{
+		Vector2D m_desiredVelocity = (m_positionTo - m_currentPosition);
+		m_desiredVelocity.Normalize();
+		m_desiredVelocity         *= m_maxSpeed;
+		m_steeringForce            = m_desiredVelocity - m_velocity;
 		break;
-		}
+	}
 	case state::Flee:
-		{
-		Vector2D vecTo = m_currentPosition - m_positionTo;
-		vecTo.Normalize();
-		if (vecTo.Length() >= 250.0f)
-		{
-			vecTo *= m_maxSpeed;
-
-			m_totalForce += (vecTo - m_velocity);
-		}
+	{
+		Vector2D m_desiredVelocity = (m_currentPosition - m_positionTo);
+		m_desiredVelocity.Normalize();
+		m_desiredVelocity         *= m_maxSpeed;
+		m_steeringForce            = m_desiredVelocity - m_velocity;
 		break;
-		}
+	}
 	case state::Arrive:
-		{
-		Vector2D vecTo = m_positionTo - m_currentPosition;
-		vecTo.Normalize();
-		float speed = vecTo.Length() * m_deceleration;
-
-		vecTo = (vecTo * speed) / vecTo.Length();
-		m_totalForce += (vecTo - m_velocity);
+	{
+		Vector2D m_targetOffset    = m_positionTo - m_currentPosition;
+		float    m_distance        = m_targetOffset.Length();
+		float    m_rampedSpeed     = m_maxSpeed * (m_distance / 250.0f);
+		float    m_clippedSpeed    = min(m_rampedSpeed, m_maxSpeed);
+		Vector2D m_desiredVelocity = (m_clippedSpeed / m_distance) * m_targetOffset;
+		         m_steeringForce   = m_desiredVelocity - m_velocity;
 		break;
-		}
+	}
 	case state::Pursuit:
-		{
+	{
 		break;
-		}
+	}
+	default:
+		break;
 	}
 
-	// set the current poistion for the drawablegameobject
+	//setPosition(Vector2D(m_currentPosition));
+	m_acceleration     = m_steeringForce / m_mass;
+	m_velocity        += m_acceleration * deltaTime;
+	m_velocity.Truncate(m_maxSpeed);
+	m_currentPosition += (m_velocity * deltaTime);
 	setPosition(Vector2D(m_currentPosition));
-
 	DrawableGameObject::update(deltaTime);
 }
 
@@ -124,22 +128,22 @@ void Vehicle::setPositionTo(Vector2D position)
 {
 	m_startPosition = m_currentPosition;
 	
-	m_positionTo = position;
+	m_positionTo    = position;
 }
 
 // set the current position
 void Vehicle::setVehiclePosition(Vector2D position)
 {
 	m_currentPosition = position;
-	m_positionTo = position;
-	m_startPosition = position;
+	m_positionTo      = position;
+	m_startPosition   = position;
 	setPosition(position);
 }
 
 void Vehicle::setWaypointManager(WaypointManager* wpm)
 {
 	m_waypointManager = wpm;
-	m_pathfinding = new Pathfinding(wpm);
+	m_pathfinding     = new Pathfinding(wpm);
 }
 
 

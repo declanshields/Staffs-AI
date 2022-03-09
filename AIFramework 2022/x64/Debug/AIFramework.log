@@ -1,9 +1,9 @@
 ﻿  AIManager.cpp
-D:\Github\Staffs-AI\AIFramework 2022\AIManager.cpp(45,11): warning C4189: 'yPos2': local variable is initialized but not referenced
-D:\Github\Staffs-AI\AIFramework 2022\AIManager.cpp(44,11): warning C4189: 'xPos2': local variable is initialized but not referenced
-D:\Github\Staffs-AI\AIFramework 2022\AIManager.cpp(166,30): warning C4100: 'param': unreferenced formal parameter
-D:\Github\Staffs-AI\AIFramework 2022\AIManager.cpp(203,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(45,11): warning C4189: 'yPos2': local variable is initialized but not referenced
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(44,11): warning C4189: 'xPos2': local variable is initialized but not referenced
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(166,30): warning C4100: 'param': unreferenced formal parameter
   Vehicle.cpp
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Vehicle.cpp(93,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   main.cpp
   Generating Code...
-  AIFramework.vcxproj -> D:\Github\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
+  AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe

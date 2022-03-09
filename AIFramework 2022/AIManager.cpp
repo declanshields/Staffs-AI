@@ -8,7 +8,7 @@
 
 AIManager::AIManager()
 {
-	m_pCar = nullptr;
+	m_pCar  = nullptr;
     m_pCar2 = nullptr;
 }
 
@@ -147,11 +147,11 @@ void AIManager::update(const float fDeltaTime)
 
 void AIManager::mouseUp(int x, int y)
 {
-    m_blueFlee = false;
-    m_blueArriving = false;
+    m_blueFlee          = false;
+    m_blueArriving      = false;
     m_blueObstacleAvoid = false;
-    m_bluePursuit = false;
-    m_blueSeeking = false;
+    m_bluePursuit       = false;
+    m_blueSeeking       = false;
 
 	// get a waypoint near the mouse click, then set the car to move to the this waypoint
 	Waypoint* wp = m_waypointManager.getNearestWaypoint(Vector2D(x, y));
@@ -172,23 +172,23 @@ void AIManager::keyDown(WPARAM param)
 {
 	// hint 65-90 are a-z
     const WPARAM key_space = 32;
-	const WPARAM key_a = 65;
-    const WPARAM key_c = 67;
-    const WPARAM key_f = 70;
-    const WPARAM key_p = 80;
-	const WPARAM key_s = 83;
-    const WPARAM key_w = 87;
+	const WPARAM key_a     = 65;
+    const WPARAM key_c     = 67;
+    const WPARAM key_f     = 70;
+    const WPARAM key_p     = 80;
+	const WPARAM key_s     = 83;
+    const WPARAM key_w     = 87;
 
     switch (param)
     {
         //a for arrive
         case key_a:
         {
-            m_blueSeeking = false;
-            m_blueFlee = false;
-            m_blueArriving = true;
-            m_blueObstacleAvoid = false;
-            m_bluePursuit = false;
+            //m_blueSeeking = false;
+            //m_blueFlee = false;
+            //m_blueArriving = true;
+            //m_blueObstacleAvoid = false;
+            //m_bluePursuit = false;
 
             if(m_pCar->getCurrentSpeed() == 0.0f)
             {
@@ -199,18 +199,22 @@ void AIManager::keyDown(WPARAM param)
                 m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
             }
 
-            Vector2D direction = m_pCar->getPosition() - m_pCar->getPositionTo();
-            float velocity = direction.Length() * m_deceleration;
-            m_pCar->setCurrentSpeed(velocity - m_pCar->getCurrentSpeed());
+            //Vector2D direction = m_pCar->getPosition() - m_pCar->getPositionTo();
+            //float velocity = direction.Length() * m_deceleration;
+            //m_pCar->setCurrentSpeed(velocity - m_pCar->getCurrentSpeed());
+
+            m_pCar->setState(state::Arrive);
+
+            break;
         }
         //c for center
         case key_c: 
         {
-            m_blueSeeking = false;
-            m_blueFlee = false;
-            m_blueArriving = false;
+            m_blueSeeking       = false;
+            m_blueFlee          = false;
+            m_blueArriving      = false;
             m_blueObstacleAvoid = false;
-            m_bluePursuit = false;
+            m_bluePursuit       = false;
 
             m_pCar->setPositionTo(Vector2D(0, 0));
             break;
@@ -241,7 +245,7 @@ void AIManager::keyDown(WPARAM param)
         //s for seek
 		case key_s:
 		{
-            m_blueSeeking = true;
+            //m_blueSeeking = true;
 
             m_path.clear();
 
@@ -254,6 +258,8 @@ void AIManager::keyDown(WPARAM param)
                 m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
             }
 
+            m_pCar->setState(state::Seek);
+
 			break;
 		}
         //w for wander
@@ -265,8 +271,8 @@ void AIManager::keyDown(WPARAM param)
             end = chrono::system_clock::now();
             chrono::duration<double> timer_elapsed = end - start;
 
-            //check to see if it has been 2 seconds or if the car is stationary (already at the point)
-			if (timer_elapsed.count() >= 1.5f || m_pCar2->getCurrentSpeed() == 0.0f)
+            //check to see if it has been 1 seconds or if the car is stationary (already at the point)
+			if (timer_elapsed.count() >= 0.5f || m_pCar2->getCurrentSpeed() == 0.0f)
 			{
                 int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
                 int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
@@ -278,7 +284,7 @@ void AIManager::keyDown(WPARAM param)
         }
         case key_p:
         {
-
+            break;
         }
         //space for pathfinding
         case key_space:
