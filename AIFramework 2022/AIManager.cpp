@@ -168,6 +168,7 @@ void AIManager::keyDown(WPARAM param)
         case key_a:
         {
             m_pCar->setState(state::Arrive);
+            m_pCar->setPositionTo(m_pCar->getPosition());
 
             break;
         }
@@ -241,8 +242,8 @@ void AIManager::handleStates()
                 Vector2D position(x, y);
 
                 m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
-                m_pCar->getMovementManager()->Arrive();
             }
+            m_pCar->getMovementManager()->Arrive();
             break;
         }
         case state::Pursuit:
