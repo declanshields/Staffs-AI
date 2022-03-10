@@ -107,10 +107,6 @@ void AIManager::update(const float fDeltaTime)
 	}
     */
 
-    //deal with timing for the wander movement
-    //set the start time of the timer to the current time
-    start = chrono::system_clock::now();
-
     // update and draw the car (and check for pickup collisions)
 	if (m_pCar != nullptr)
 	{
@@ -123,17 +119,6 @@ void AIManager::update(const float fDeltaTime)
         m_pCar2->update(fDeltaTime);
         checkForCollisions(m_pCar2);
         AddItemToDrawList(m_pCar2);
-
-        if (m_redWander)
-            keyDown(87);
-        if (m_blueSeeking)
-            keyDown(83);
-        if (m_blueFlee)
-            keyDown(70);
-        if (m_pathfinding)
-            keyDown(32);
-        if (m_blueArriving)
-            keyDown(65);
     }
 
     if (!m_path.empty())
@@ -143,16 +128,13 @@ void AIManager::update(const float fDeltaTime)
             AddItemToDrawList(wps);
         }
     }
+
+    //update cars based off current state
+    handleStates();
 }
 
 void AIManager::mouseUp(int x, int y)
 {
-    m_blueFlee          = false;
-    m_blueArriving      = false;
-    m_blueObstacleAvoid = false;
-    m_bluePursuit       = false;
-    m_blueSeeking       = false;
-
 	// get a waypoint near the mouse click, then set the car to move to the this waypoint
 	Waypoint* wp = m_waypointManager.getNearestWaypoint(Vector2D(x, y));
 	if (wp == nullptr)
@@ -160,7 +142,7 @@ void AIManager::mouseUp(int x, int y)
 
     // steering mode
     m_pCar->setPositionTo(wp->getPosition());
-    m_pCar->setState(state::Seek);
+    m_pCar->setState(state::MouseSeek);
 }
 
 void AIManager::keyUp(WPARAM param)
@@ -174,6 +156,7 @@ void AIManager::keyDown(WPARAM param)
     const WPARAM key_space = 32;
 	const WPARAM key_a     = 65;
     const WPARAM key_c     = 67;
+    const WPARAM key_e     = 69;
     const WPARAM key_f     = 70;
     const WPARAM key_p     = 80;
 	const WPARAM key_s     = 83;
@@ -184,25 +167,6 @@ void AIManager::keyDown(WPARAM param)
         //a for arrive
         case key_a:
         {
-            //m_blueSeeking = false;
-            //m_blueFlee = false;
-            //m_blueArriving = true;
-            //m_blueObstacleAvoid = false;
-            //m_bluePursuit = false;
-
-            if(m_pCar->getCurrentSpeed() == 0.0f)
-            {
-                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
-                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
-                Vector2D position(x, y);
-
-                m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
-            }
-
-            //Vector2D direction = m_pCar->getPosition() - m_pCar->getPositionTo();
-            //float velocity = direction.Length() * m_deceleration;
-            //m_pCar->setCurrentSpeed(velocity - m_pCar->getCurrentSpeed());
-
             m_pCar->setState(state::Arrive);
 
             break;
@@ -210,46 +174,85 @@ void AIManager::keyDown(WPARAM param)
         //c for center
         case key_c: 
         {
-            m_blueSeeking       = false;
-            m_blueFlee          = false;
-            m_blueArriving      = false;
-            m_blueObstacleAvoid = false;
-            m_bluePursuit       = false;
+            m_pCar->setState(state::Idle);
 
             m_pCar->setPositionTo(Vector2D(0, 0));
+            break;
+        }
+        //e for evade
+        case key_e:
+        {
+            m_pCar->setState(state::Evade);
             break;
         }
         //f for flee
         case key_f: 
         {
-            m_blueFlee = true;
-
-            m_path.clear();
-
-            Vector2D length;
-            length.x = (m_pCar2->getPosition().x - m_pCar->getPosition().x);
-            length.y = (m_pCar2->getPosition().y - m_pCar->getPosition().y);
-
-            if (length.Length() <= 300)
-            {
-                m_pCar->setPositionTo(m_pCar->getPosition() - m_pCar2->getPosition());
-                m_blueFlee = true;
-            }
-            else
-            {
-                m_pCar->setPositionTo(m_pCar->getPosition());
-            }
+            m_pCar->setState(state::Flee);
 
             break;
         }
         //s for seek
 		case key_s:
 		{
-            //m_blueSeeking = true;
+            m_pCar->setState(state::Seek);
 
-            m_path.clear();
+			break;
+		}
+        //w for wander
+        case key_w:
+        {
+            m_pCar2->setState(state::Wander);
 
-            if (m_pCar->getCurrentSpeed() == 0.0f)
+            break;
+        }
+        case key_p:
+        {
+            m_pCar->setState(state::Pursuit);
+
+            break;
+        }
+        //space for pathfinding
+        case key_space:
+        {
+            m_pCar2->setState(state::Pathfinding);
+
+            break;
+        }
+        // etc
+        default:
+            break;
+    }
+}
+
+void AIManager::handleStates()
+{
+    //handle car 1 states
+    if (m_pCar != nullptr)
+    {
+        switch (m_pCar->getState())
+        {
+        case state::Arrive:
+        {
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+            {
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D position(x, y);
+
+                m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
+                m_pCar->getMovementManager()->Arrive();
+            }
+            break;
+        }
+        case state::Pursuit:
+        {
+            m_pCar->getMovementManager()->Pursuit(m_pCar2);
+            break;
+        }
+        case state::Seek:
+        {
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
             {
                 int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
                 int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
@@ -258,40 +261,149 @@ void AIManager::keyDown(WPARAM param)
                 m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
             }
 
-            m_pCar->setState(state::Seek);
+        		m_pCar->getMovementManager()->Seek();
 
-			break;
-		}
-        //w for wander
-        case key_w:
+            break;
+        }
+        case state::MouseSeek:
+	        {
+                if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+                {
+                    m_pCar->setState(state::Idle);
+                }
+                else
+        		    m_pCar->getMovementManager()->Seek();
+        		break;
+	        }
+        case state::Evade:
         {
-            m_redWander = true;
+            m_pCar->getMovementManager()->Evade(m_pCar2);
+            break;
+        }
+        case state::Flee:
+        {
+            Vector2D length;
+            length.x = (m_pCar2->getPosition().x - m_pCar->getPosition().x);
+            length.y = (m_pCar2->getPosition().y - m_pCar->getPosition().y);
 
-			//set the end time to the current time
-            end = chrono::system_clock::now();
-            chrono::duration<double> timer_elapsed = end - start;
+            if (length.Length() <= 300)
+            {
+                m_pCar->setPositionTo(m_pCar->getPosition() - m_pCar2->getPosition());
+                m_pCar->getMovementManager()->Flee();
+            }
+            else
+            {
+                m_pCar->setPositionTo(m_pCar->getPosition());
+                m_pCar->setState(state::Idle);
+            }
 
-            //check to see if it has been 1 seconds or if the car is stationary (already at the point)
-			if (timer_elapsed.count() >= 0.5f || m_pCar2->getCurrentSpeed() == 0.0f)
-			{
+            break;
+        }
+        case state::Wander:
+        {
+            m_pCar->getMovementManager()->Wander();
+            break;
+        }
+        case state::ObstacleAvoid:
+        {
+            break;
+        }
+        case state::Idle:
+        {
+            m_pCar->setPositionTo(m_pCar->getPosition());
+            m_pCar->getMovementManager()->Seek();
+        }
+        default:
+            break;
+        }
+    }
+
+    //handle car 2 states
+    if (m_pCar2 != nullptr)
+    {
+        switch (m_pCar2->getState())
+        {
+        case state::Arrive:
+        {
+            m_path.clear();
+
+            if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
                 int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
                 int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
                 Vector2D position(x, y);
 
                 m_pCar2->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
-			}
+                m_pCar2->getMovementManager()->Arrive();
+            }
             break;
         }
-        case key_p:
+        case state::Pursuit:
         {
-            break;
-        }
-        //space for pathfinding
-        case key_space:
-        {
-            m_redWander = false;
-            m_pathfinding = true;
+            m_path.clear();
 
+            m_pCar2->getMovementManager()->Pursuit(m_pCar);
+            break;
+        }
+        case state::Seek:
+        {
+            m_path.clear();
+
+            if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D position(x, y);
+
+                m_pCar2->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
+                m_pCar2->getMovementManager()->Seek();
+            }
+            break;
+        }
+        case state::Evade:
+        {
+            m_path.clear();
+
+            m_pCar2->getMovementManager()->Evade(m_pCar);
+            break;
+        }
+        case state::Flee:
+        {
+            m_path.clear();
+
+            Vector2D length;
+            length.x = (m_pCar->getPosition().x - m_pCar2->getPosition().x);
+            length.y = (m_pCar->getPosition().y - m_pCar2->getPosition().y);
+
+            if (length.Length() <= 300)
+            {
+                m_pCar2->setPositionTo(m_pCar2->getPosition() - m_pCar->getPosition());
+                m_pCar2->getMovementManager()->Flee();
+            }
+            else
+            {
+                m_pCar2->setPositionTo(m_pCar2->getPosition());
+                m_pCar2->setState(state::Idle);
+            }
+
+            break;
+        }
+        case state::Wander:
+        {
+            m_pCar2->getMovementManager()->Wander();
+            break;
+        }
+        case state::ObstacleAvoid:
+        {
+            break;
+        }
+        case state::Idle:
+        {
+            m_pCar2->setPositionTo(m_pCar2->getPosition());
+            m_pCar2->getMovementManager()->Seek();
+        }
+        case state::Pathfinding:
+        {
             if (m_path.empty() && !m_pickups.empty())
             {
                 //defaults the end position to the cars current position if there is no passengers to pick up
@@ -301,34 +413,41 @@ void AIManager::keyDown(WPARAM param)
                 for (int i = 0; i <= m_pickups.size(); i++)
                 {
                     //if the object is a passenger, set its position to the end point
-	                if (m_pickups[i]->getType() == pickuptype::Passenger)
-	                {
+                    if (m_pickups[i]->getType() == pickuptype::Passenger)
+                    {
                         endPos = m_pickups[i]->getPosition();
                         break;
-	                }
+                    }
                 }
 
-                m_path = m_pCar2->GetPathfinderManager()->BreadthFirst(m_pCar2->getPosition(), endPos);
+                m_path = m_pCar2->getPathfinderManager()->BreadthFirst(m_pCar2->getPosition(), endPos);
             }
 
-            if (m_pCar2->getCurrentSpeed() == 0.0f)
+            if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
-                if (m_path.size() > 0)
+                if (m_path.size() > 0 && m_path.size() != 1)
                 {
                     Waypoint* nextPoint = m_path[m_path.size() - 1];
                     m_pCar2->setPositionTo(nextPoint->getPosition());
+                    m_pCar2->getMovementManager()->Seek();
+                }
+                if (m_path.size() == 1)
+                {
+                    Waypoint* finalPoint = m_path[m_path.size() - 1];
+                    m_pCar2->setPositionTo(finalPoint->getPosition());
+                    m_pCar2->getMovementManager()->Arrive();
                 }
             }
-            if (m_pCar2->getPosition() == m_path[m_path.size() - 1]->getPosition())
+            if ((m_pCar2->getPosition() - m_path[m_path.size() - 1]->getPosition()).Length() <= m_deadZone)
                 m_path.pop_back();
-
             break;
         }
-        // etc
         default:
             break;
+        }
     }
 }
+
 
 void AIManager::setRandomPickupPosition(PickupItem* pickup)
 {

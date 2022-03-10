@@ -9,14 +9,15 @@ public:
 	MovementManager(Vehicle* thisCar);
 	~MovementManager();
 
-	Vector2D Seek();
-	Vector2D Flee();
-	Vector2D Arrive();
-	Vector2D Pursuit(Vehicle* otherCar);
-	Vector2D Evade(Vehicle* otherCar);
+	void Seek();
+	void Flee();
+	void Arrive();
+	void Pursuit(Vehicle* otherCar); //Kind of work now i think
+	void Evade(Vehicle* otherCar);	 //Kind of work now i think
+	void Wander();
 
 private:
 	Vehicle* m_car = nullptr;
-	float m_decelerationDistance = 250.0f;
+	float    m_decelerationDistance = 250.0f;
 };
 

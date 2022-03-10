@@ -1,9 +1,5 @@
 #include "Vehicle.h"
 
-#define HALF_MAX_SPEED   100
-#define NORMAL_MAX_SPEED 200
-#define DOUBLE_MAX_SPEED 400
-
 HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 {
 	m_scale = XMFLOAT3(30, 20, 1);
@@ -19,11 +15,14 @@ HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 
 	HRESULT hr     = DrawableGameObject::initMesh(pd3dDevice);
 
-	m_maxSpeed     = NORMAL_MAX_SPEED;
 	m_currentSpeed = 0;
+
 	setVehiclePosition(Vector2D(0, 0));
 
 	m_lastPosition = Vector2D(0, 0);
+
+	m_movementManager = new MovementManager(this);
+	m_currentState = state::Idle;
 
 	return hr;
 }
@@ -61,47 +60,9 @@ void Vehicle::update(const float deltaTime)
 
 	//force based movement
 	Vector2D m_steeringForce;
-	Vector2D m_acceleration;
 
-	switch (m_currentState)
-	{
-	case state::Seek:
-	{
-		Vector2D m_desiredVelocity = (m_positionTo - m_currentPosition);
-		m_desiredVelocity.Normalize();
-		m_desiredVelocity         *= m_maxSpeed;
-		m_steeringForce            = m_desiredVelocity - m_velocity;
-		break;
-	}
-	case state::Flee:
-	{
-		Vector2D m_desiredVelocity = (m_currentPosition - m_positionTo);
-		m_desiredVelocity.Normalize();
-		m_desiredVelocity         *= m_maxSpeed;
-		m_steeringForce            = m_desiredVelocity - m_velocity;
-		break;
-	}
-	case state::Arrive:
-	{
-		Vector2D m_targetOffset    = m_positionTo - m_currentPosition;
-		float    m_distance        = m_targetOffset.Length();
-		float    m_rampedSpeed     = m_maxSpeed * (m_distance / 250.0f);
-		float    m_clippedSpeed    = min(m_rampedSpeed, m_maxSpeed);
-		Vector2D m_desiredVelocity = (m_clippedSpeed / m_distance) * m_targetOffset;
-		         m_steeringForce   = m_desiredVelocity - m_velocity;
-		break;
-	}
-	case state::Pursuit:
-	{
-		break;
-	}
-	default:
-		break;
-	}
+	m_lastPosition = m_currentPosition;
 
-	m_lastPosition     = m_currentPosition;
-
-	m_acceleration     = m_steeringForce / m_mass;
 	m_velocity        += m_acceleration * deltaTime;
 	m_velocity.Truncate(m_maxSpeed);
 	m_currentPosition += (m_velocity * deltaTime);

@@ -1,3 +1,9 @@
-﻿  Vehicle.cpp
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Vehicle.cpp(87,30): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
+﻿  MovementManager.cpp
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(43,29): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(55,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(64,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(66,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(82,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(86,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Github\Staffs-AI\AIFramework 2022\MovementManager.cpp(88,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  AIFramework.vcxproj -> D:\Github\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe

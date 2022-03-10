@@ -20,6 +20,7 @@ public:
 	void	 mouseUp(int x, int y);
 	void	 keyDown(WPARAM param);
 	void	 keyUp(WPARAM param);
+	void     handleStates();
 
 protected:
 	bool	 checkForCollisions(Vehicle* car);
@@ -31,19 +32,11 @@ private:
 	Vehicle*                m_pCar2 = nullptr;
 	WaypointManager			m_waypointManager;
 
-	float m_deceleration = 0.5f;
+	      float m_deceleration = 0.5f;
+	const float m_deadZone     = 50.0f;
 
 	vector<Waypoint*> m_path;
 
-	bool m_blueSeeking       = false;
-	bool m_blueArriving      = false;
-	bool m_bluePursuit       = false;
-	bool m_blueFlee          = false;
-	bool m_blueObstacleAvoid = false;
-
-	bool m_redWander         = false;
-
-	bool m_pathfinding       = false;
 	bool m_clear             = false;
 
 	//time points to store the start and end points of the timer
