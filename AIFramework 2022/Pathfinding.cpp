@@ -66,6 +66,9 @@ vector<Waypoint*> Pathfinding::BreadthFirst(Vector2D startPos, Vector2D endPos)
 		current = temp;
 	}
 
+	delete current;
+	current = nullptr;
+
 	return path;
 }
 
@@ -126,6 +129,9 @@ vector<Waypoint*> Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos)
 		path.push_back(temp);
 		current = temp;
 	}
+
+	delete current;
+	current = nullptr;
 
 	return path;
 }
@@ -189,6 +195,9 @@ vector<Waypoint*> Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 		path.push_back(temp);
 		current = temp;
 	}
+
+	delete current;
+	current = nullptr;
 
 	return path;
 }
