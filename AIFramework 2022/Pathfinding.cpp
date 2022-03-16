@@ -68,3 +68,127 @@ vector<Waypoint*> Pathfinding::BreadthFirst(Vector2D startPos, Vector2D endPos)
 
 	return path;
 }
+
+vector<Waypoint*> Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos) 
+{
+	Waypoint* start = m_waypointManager->getNearestWaypoint(startPos);
+	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos); 
+
+	wayPair initial;
+	initial.first = 0;
+	initial.second = start;
+
+	priority_queue<wayPair, std::vector<wayPair>, greater<wayPair>> frontier;
+	frontier.push(initial);
+
+	unordered_map<Waypoint*, Waypoint*> came_from;
+	unordered_map<Waypoint*, float> cost_so_far;
+
+	cost_so_far.insert({ start, 0.0f });
+
+	while (!frontier.empty())
+	{
+		Waypoint* current = frontier.top().second;
+		frontier.pop();
+
+		if (current == goal)
+			break;
+
+		vecWaypoints currentNeighbours = m_waypointManager->getNeighbouringWaypoints(current);
+
+		for (Waypoint* neighbour : currentNeighbours)
+		{
+			float costToNeighbour = cost_so_far.find(current)->second + (neighbour->getPosition() - current->getPosition()).Length();
+			if ((came_from.find(neighbour) == came_from.end()) || costToNeighbour < cost_so_far.find(neighbour)->second)
+			{
+				cost_so_far.insert({ neighbour, costToNeighbour });
+				came_from.insert({ neighbour, current });
+
+				wayPair temp;
+				temp.first = costToNeighbour;
+				temp.second = neighbour;
+
+				frontier.push(temp);
+			}
+		}
+	}
+
+	Waypoint* current = new Waypoint();
+
+	vector<Waypoint*> path;
+	path.push_back(goal);
+	current = goal;
+
+	while (came_from[current] != current)
+	{
+		Waypoint* temp = came_from[current];
+
+		path.push_back(temp);
+		current = temp;
+	}
+
+	return path;
+}
+
+vector<Waypoint*> Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
+{
+	Waypoint* start = m_waypointManager->getNearestWaypoint(startPos);
+	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos);
+
+	wayPair initial;
+	initial.first = 0;
+	initial.second = start;
+
+	priority_queue<wayPair, std::vector<wayPair>, greater<wayPair>> frontier;
+	frontier.push(initial);
+
+	unordered_map<Waypoint*, Waypoint*> came_from;
+	unordered_map<Waypoint*, float> cost_so_far;
+
+	cost_so_far.insert({ start, 0.0f });
+
+	while (!frontier.empty())
+	{
+		Waypoint* current = frontier.top().second;
+		frontier.pop();
+
+		if (current == goal)
+			break;
+
+		vecWaypoints currentNeighbours = m_waypointManager->getNeighbouringWaypoints(current);
+
+		for (Waypoint* neighbour : currentNeighbours)
+		{
+			float costToNeighbour = cost_so_far.find(current)->second + (neighbour->getPosition() - current->getPosition()).Length();
+			if ((came_from.find(neighbour) == came_from.end()) || costToNeighbour < cost_so_far.find(neighbour)->second)
+			{
+				cost_so_far.insert({ neighbour, costToNeighbour });
+				float priority = costToNeighbour + (goal->getPosition() - current->getPosition()).Length();
+
+				came_from.insert({ neighbour, current });
+
+				wayPair temp;
+				temp.first = priority;
+				temp.second = neighbour;
+
+				frontier.push(temp);
+			}
+		}
+	}
+
+	Waypoint* current = new Waypoint();
+
+	vector<Waypoint*> path;
+	path.push_back(goal);
+	current = goal;
+
+	while (came_from[current] != current)
+	{
+		Waypoint* temp = came_from[current];
+
+		path.push_back(temp);
+		current = temp;
+	}
+
+	return path;
+}

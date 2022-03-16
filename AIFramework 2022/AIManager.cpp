@@ -262,20 +262,20 @@ void AIManager::handleStates()
                 m_pCar->setPositionTo(m_waypointManager.getNearestWaypoint(position)->getPosition());
             }
 
-        		m_pCar->getMovementManager()->Seek();
+        	m_pCar->getMovementManager()->Seek();
 
             break;
         }
         case state::MouseSeek:
-	        {
-                if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
-                {
-                    m_pCar->setState(state::Idle);
-                }
-                else
-        		    m_pCar->getMovementManager()->Seek();
-        		break;
-	        }
+	    {
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+            {
+                m_pCar->setState(state::Idle);
+            }
+            else
+        		m_pCar->getMovementManager()->Seek();
+            break;
+	    }
         case state::Evade:
         {
             m_pCar->getMovementManager()->Evade(m_pCar2);
@@ -313,6 +313,8 @@ void AIManager::handleStates()
         {
             m_pCar->setPositionTo(m_pCar->getPosition());
             m_pCar->getMovementManager()->Seek();
+
+            break;
         }
         default:
             break;
@@ -402,6 +404,8 @@ void AIManager::handleStates()
         {
             m_pCar2->setPositionTo(m_pCar2->getPosition());
             m_pCar2->getMovementManager()->Seek();
+
+            break;
         }
         case state::Pathfinding:
         {
@@ -421,7 +425,7 @@ void AIManager::handleStates()
                     }
                 }
 
-                m_path = m_pCar2->getPathfinderManager()->BreadthFirst(m_pCar2->getPosition(), endPos);
+                m_path = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
             }
 
             if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)

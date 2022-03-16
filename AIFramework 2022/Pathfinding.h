@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
+typedef std::pair<float, Waypoint*> wayPair;
+
 class Pathfinding
 {
 private:
@@ -15,5 +17,7 @@ public:
 	~Pathfinding();
 
 	vector<Waypoint*> BreadthFirst(Vector2D startPos, Vector2D endPos);
+	vector<Waypoint*> Dijkstras(Vector2D startPos, Vector2D endPos);
+	vector<Waypoint*> AStar(Vector2D startPos, Vector2D endPos);
 };
 
