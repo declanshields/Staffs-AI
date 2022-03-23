@@ -29,35 +29,6 @@ HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 
 void Vehicle::update(const float deltaTime)
 {
-	//// consider replacing with force based acceleration / velocity calculations
-	//Vector2D vecTo = m_positionTo - m_currentPosition;
-	//float velocity = 0;
-
-	//float length = (float)vecTo.Length();
-	//// if the distance to the end point is less than the car would move, then only move that distance. 
-	//if (length > 0) {
-	//	vecTo.Normalize();
-	//	velocity = m_currentSpeed + (deltaTime * 2.5f);
-
-	//	if (velocity >= m_maxSpeed)
-	//		velocity = m_maxSpeed;
-
-	//	if(length > velocity)
-	//		vecTo *= velocity;
-	//	else
-	//		vecTo *= length;
-
-	//	m_currentPosition += vecTo;
-	//}
-
-	//m_lastPosition = m_currentPosition;
-	//m_currentSpeed = velocity;
-
-	//// set the current poistion for the drawablegameobject
-	//setPosition(Vector2D(m_currentPosition));
-
-	//DrawableGameObject::update(deltaTime);
-
 	//force based movement
 	Vector2D m_steeringForce;
 
@@ -75,6 +46,10 @@ void Vehicle::update(const float deltaTime)
 		diff.Normalize();
 		m_radianRotation = atan2f((float)diff.y, (float)diff.x); // this is used by DrawableGameObject to set the rotation
 	}
+
+	m_fuel -= diff.Length();
+	if (m_fuel <= 0.0f)
+		m_fuel = 0.0f;
 
 	DrawableGameObject::update(deltaTime);
 }

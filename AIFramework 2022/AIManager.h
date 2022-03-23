@@ -36,6 +36,7 @@ private:
 	const float m_deadZone     = 50.0f;
 
 	vector<Waypoint*> m_path;
+	vector<Waypoint*> m_pathToFuel;
 
 	bool m_clear             = false;
 

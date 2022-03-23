@@ -66,9 +66,13 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
     m_pickups.push_back(pPickupPassenger);
 
     // NOTE!! for fuel and speedboost - you will need to create these here yourself
+    PickupItem* pFuel = new PickupItem();
+    hr = pFuel->initMesh(pd3dDevice, pickuptype::Fuel);
+    m_pickups.push_back(pFuel);
 
     // (needs to be done after waypoint setup)
     setRandomPickupPosition(pPickupPassenger);
+    setRandomPickupPosition(pFuel);
 
     return hr;
 }
@@ -110,12 +114,18 @@ void AIManager::update(const float fDeltaTime)
     // update and draw the car (and check for pickup collisions)
 	if (m_pCar != nullptr)
 	{
+        if (m_pCar->getFuelLeft() == 0.0f)
+            m_pCar->setState(state::Idle);
+
 		m_pCar->update(fDeltaTime);
         checkForCollisions(m_pCar);
 		AddItemToDrawList(m_pCar);
 	}
     if (m_pCar2 != nullptr)
     {
+        if (m_pCar2->getFuelLeft() == 0.0f)
+            m_pCar2->setState(state::Idle);
+
         m_pCar2->update(fDeltaTime);
         checkForCollisions(m_pCar2);
         AddItemToDrawList(m_pCar2);
@@ -441,6 +451,11 @@ void AIManager::handleStates()
             }
             if ((m_pCar2->getPosition() - m_path[m_path.size() - 1]->getPosition()).Length() <= m_deadZone)
                 m_path.pop_back();
+            break;
+        }
+        case state::CollectFuel:
+        {
+
             break;
         }
         default:
