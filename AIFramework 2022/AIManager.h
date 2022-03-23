@@ -1,5 +1,6 @@
 #pragma once
 
+#include "structs.h"
 #include "WaypointManager.h"
 #include <chrono>
 
@@ -35,8 +36,8 @@ private:
 	      float m_deceleration = 0.5f;
 	const float m_deadZone     = 50.0f;
 
-	vector<Waypoint*> m_path;
-	vector<Waypoint*> m_pathToFuel;
+	Path m_path;
+	Path m_fuelPath;
 
 	bool m_clear             = false;
 

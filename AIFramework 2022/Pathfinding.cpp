@@ -15,10 +15,12 @@ Pathfinding::~Pathfinding()
 	}
 }
 
-vector<Waypoint*> Pathfinding::BreadthFirst(Vector2D startPos, Vector2D endPos)
+Path Pathfinding::BreadthFirst(Vector2D startPos, Vector2D endPos)
 {
 	Waypoint* start = m_waypointManager->getNearestWaypoint(startPos);
 	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos);
+
+	Path returnPath;
 
 	queue<Waypoint*> frontier;
 	frontier.push(start);
@@ -66,16 +68,18 @@ vector<Waypoint*> Pathfinding::BreadthFirst(Vector2D startPos, Vector2D endPos)
 		current = temp;
 	}
 
-	delete current;
 	current = nullptr;
 
-	return path;
+	returnPath.path = path;
+	returnPath.distance = 0;
+
+	return returnPath;
 }
 
-vector<Waypoint*> Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos) 
+Path Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos)
 {
 	Waypoint* start = m_waypointManager->getNearestWaypoint(startPos);
-	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos); 
+	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos);
 
 	wayPair initial;
 	initial.first = 0;
@@ -89,13 +93,18 @@ vector<Waypoint*> Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos)
 
 	cost_so_far.insert({ start, 0.0f });
 
+
+	Path returnPath;
+
 	while (!frontier.empty())
 	{
 		Waypoint* current = frontier.top().second;
 		frontier.pop();
 
 		if (current == goal)
+		{
 			break;
+		}
 
 		vecWaypoints currentNeighbours = m_waypointManager->getNeighbouringWaypoints(current);
 
@@ -120,23 +129,25 @@ vector<Waypoint*> Pathfinding::Dijkstras(Vector2D startPos, Vector2D endPos)
 
 	vector<Waypoint*> path;
 	path.push_back(goal);
-	current = goal;
+	current = goal;		
 
 	while (came_from[current] != current)
-	{
+	{		
+		returnPath.distance += cost_so_far[current];
 		Waypoint* temp = came_from[current];
 
 		path.push_back(temp);
 		current = temp;
 	}
 
-	delete current;
 	current = nullptr;
 
-	return path;
+	returnPath.path = path;
+
+	return returnPath;
 }
 
-vector<Waypoint*> Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
+Path Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 {
 	Waypoint* start = m_waypointManager->getNearestWaypoint(startPos);
 	Waypoint* goal = m_waypointManager->getNearestWaypoint(endPos);
@@ -144,6 +155,8 @@ vector<Waypoint*> Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 	wayPair initial;
 	initial.first = 0;
 	initial.second = start;
+
+	Path returnPath;
 
 	priority_queue<wayPair, std::vector<wayPair>, greater<wayPair>> frontier;
 	frontier.push(initial);
@@ -190,14 +203,15 @@ vector<Waypoint*> Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 
 	while (came_from[current] != current)
 	{
+		returnPath.distance += cost_so_far[current];
 		Waypoint* temp = came_from[current];
 
 		path.push_back(temp);
 		current = temp;
 	}
 
-	delete current;
+	returnPath.path = path;
 	current = nullptr;
 
-	return path;
+	return returnPath;
 }

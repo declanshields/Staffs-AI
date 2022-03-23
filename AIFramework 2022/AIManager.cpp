@@ -131,9 +131,9 @@ void AIManager::update(const float fDeltaTime)
         AddItemToDrawList(m_pCar2);
     }
 
-    if (!m_path.empty())
+    if (!m_path.path.empty())
     {
-        for (Waypoint* wps : m_path)
+        for (Waypoint* wps : m_path.path)
         {
             AddItemToDrawList(wps);
         }
@@ -338,7 +338,7 @@ void AIManager::handleStates()
         {
         case state::Arrive:
         {
-            m_path.clear();
+            m_path.path.clear();
 
             if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
@@ -353,14 +353,14 @@ void AIManager::handleStates()
         }
         case state::Pursuit:
         {
-            m_path.clear();
+            m_path.path.clear();
 
             m_pCar2->getMovementManager()->Pursuit(m_pCar);
             break;
         }
         case state::Seek:
         {
-            m_path.clear();
+            m_path.path.clear();
 
             if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
@@ -375,14 +375,14 @@ void AIManager::handleStates()
         }
         case state::Evade:
         {
-            m_path.clear();
+            m_path.path.clear();
 
             m_pCar2->getMovementManager()->Evade(m_pCar);
             break;
         }
         case state::Flee:
         {
-            m_path.clear();
+            m_path.path.clear();
 
             Vector2D length;
             length.x = (m_pCar->getPosition().x - m_pCar2->getPosition().x);
@@ -419,7 +419,7 @@ void AIManager::handleStates()
         }
         case state::Pathfinding:
         {
-            if (m_path.empty() && !m_pickups.empty())
+            if (m_path.path.empty() && !m_pickups.empty())
             {
                 //defaults the end position to the cars current position if there is no passengers to pick up
                 Vector2D endPos = m_pCar2->getPosition();
@@ -440,26 +440,91 @@ void AIManager::handleStates()
 
             if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
-                if (m_path.size() > 0 && m_path.size() != 1)
+                for (int i = 0; i <= m_pickups.size(); i++)
                 {
-                    Waypoint* nextPoint = m_path[m_path.size() - 1];
+                    //if the object is a passenger, set its position to the end point
+                    if (m_pickups[i]->getType() == pickuptype::Fuel)
+                    {
+                        Vector2D endPos = m_pickups[i]->getPosition();
+                        m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
+                        break;
+                    }
+                }
+                if (m_fuelPath.distance < m_path.distance)
+                {
+                    m_pCar2->setState(state::CollectFuel);
+                    break;
+                }
+                if (m_path.path.size() > 0 && m_path.path.size() != 1)
+                {
+                    Waypoint* nextPoint = m_path.path[m_path.path.size() - 1];
                     m_pCar2->setPositionTo(nextPoint->getPosition());
                     m_pCar2->getMovementManager()->Seek();
                 }
-                if (m_path.size() == 1)
+                if (m_path.path.size() == 1)
                 {
-                    Waypoint* finalPoint = m_path[m_path.size() - 1];
+                    Waypoint* finalPoint = m_path.path[m_path.path.size() - 1];
                     m_pCar2->setPositionTo(finalPoint->getPosition());
                     m_pCar2->getMovementManager()->Arrive();
                 }
             }
-            if ((m_pCar2->getPosition() - m_path[m_path.size() - 1]->getPosition()).Length() <= m_deadZone)
-                m_path.pop_back();
+            if ((m_pCar2->getPosition() - m_path.path[m_path.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                m_path.path.pop_back();
             break;
         }
         case state::CollectFuel:
         {
+            if (m_path.path.empty() && !m_pickups.empty())
+            {
+                //defaults the end position to the cars current position if there is no passengers to pick up
+                Vector2D endPos = m_pCar2->getPosition();
 
+                //loops through vector to find any passengers
+                for (int i = 0; i <= m_pickups.size(); i++)
+                {
+                    //if the object is a passenger, set its position to the end point
+                    if (m_pickups[i]->getType() == pickuptype::Fuel)
+                    {
+                        endPos = m_pickups[i]->getPosition();
+                        break;
+                    }
+                }
+
+                m_path = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
+            }
+
+            if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
+                for (int i = 0; i <= m_pickups.size(); i++)
+                {
+                    //if the object is a passenger, set its position to the end point
+                    if (m_pickups[i]->getType() == pickuptype::Fuel)
+                    {
+                        Vector2D endPos = m_pickups[i]->getPosition();
+                        m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
+                        break;
+                    }
+                }
+                if (m_path.distance < m_fuelPath.distance)
+                {
+                    m_pCar2->setState(state::Pathfinding);
+                    break;
+                }
+                if (m_path.path.size() > 0 && m_path.path.size() != 1)
+                {
+                    Waypoint* nextPoint = m_path.path[m_path.path.size() - 1];
+                    m_pCar2->setPositionTo(nextPoint->getPosition());
+                    m_pCar2->getMovementManager()->Seek();
+                }
+                if (m_path.path.size() == 1)
+                {
+                    Waypoint* finalPoint = m_path.path[m_path.path.size() - 1];
+                    m_pCar2->setPositionTo(finalPoint->getPosition());
+                    m_pCar2->getMovementManager()->Arrive();
+                }
+            }
+            if ((m_pCar2->getPosition() - m_path.path[m_path.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                m_path.path.pop_back();
             break;
         }
         default:
@@ -526,35 +591,41 @@ bool AIManager::checkForCollisions(Vehicle* car)
     // do the same for a pickup item
     // a pickup - !! NOTE it is only referring the first one in the list !!
     // to get the passenger, fuel or speedboost specifically you will need to iterate the pickups and test their type (getType()) - see the pickup class
-    XMVECTOR puPos;
-    XMVECTOR puScale;
-    XMMatrixDecompose(
-        &puScale,
-        &dummy,
-        &puPos,
-        XMLoadFloat4x4(m_pickups[0]->getTransform())
-    );
 
-    // bounding sphere for pickup item
-    XMStoreFloat3(&scale, puScale);
-    BoundingSphere boundingSpherePU;
-    XMStoreFloat3(&boundingSpherePU.Center, puPos);
-    boundingSpherePU.Radius = scale.x;
-
-	// THIS IS generally where you enter code to test each type of pickup
-    // does the car bounding sphere collide with the pickup bounding sphere?
-    if (boundingSphereCar.Intersects(boundingSpherePU))
+    for (int i = 0; i < m_pickups.size(); i++)
     {
-        OutputDebugStringA("Pickup Collision\n");
-        m_pickups[0]->hasCollided();
-        setRandomPickupPosition(m_pickups[0]);
+        XMVECTOR puPos;
+        XMVECTOR puScale;
+        XMMatrixDecompose(
+            &puScale,
+            &dummy,
+            &puPos,
+            XMLoadFloat4x4(m_pickups[i]->getTransform())
+        );
 
-        // you will need to test the type of the pickup to decide on the behaviour
-        // m_pCar->dosomething(); ...
+        // bounding sphere for pickup item
+        XMStoreFloat3(&scale, puScale);
+        BoundingSphere boundingSpherePU;
+        XMStoreFloat3(&boundingSpherePU.Center, puPos);
+        boundingSpherePU.Radius = scale.x;
 
-        return true;
+        // THIS IS generally where you enter code to test each type of pickup
+        // does the car bounding sphere collide with the pickup bounding sphere?
+        if (boundingSphereCar.Intersects(boundingSpherePU))
+        {
+            OutputDebugStringA("Pickup Collision\n");
+            m_pickups[i]->hasCollided();
+            setRandomPickupPosition(m_pickups[i]);
+
+            // you will need to test the type of the pickup to decide on the behaviour
+            // m_pCar->dosomething(); ...
+
+            if (m_pickups[i]->getType() == pickuptype::Fuel)
+                car->setFuel();
+
+            return true;
+        }
     }
-
     return false;
 }
 

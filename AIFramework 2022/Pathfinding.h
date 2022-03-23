@@ -16,8 +16,8 @@ public:
 	Pathfinding(WaypointManager* wpManager);
 	~Pathfinding();
 
-	vector<Waypoint*> BreadthFirst(Vector2D startPos, Vector2D endPos);
-	vector<Waypoint*> Dijkstras(Vector2D startPos, Vector2D endPos);
-	vector<Waypoint*> AStar(Vector2D startPos, Vector2D endPos);
+	Path BreadthFirst(Vector2D startPos, Vector2D endPos);
+	Path Dijkstras(Vector2D startPos, Vector2D endPos);
+	Path AStar(Vector2D startPos, Vector2D endPos);
 };
 

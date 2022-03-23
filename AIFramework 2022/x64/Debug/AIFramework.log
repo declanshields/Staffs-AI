@@ -1,16 +1,5 @@
 ﻿  AIManager.cpp
 C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(45,11): warning C4189: 'yPos2': local variable is initialized but not referenced
 C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(44,11): warning C4189: 'xPos2': local variable is initialized but not referenced
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(148,30): warning C4100: 'param': unreferenced formal parameter
-  MovementManager.cpp
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(43,29): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(55,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(64,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(66,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(82,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(86,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp(88,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  Vehicle.cpp
-  main.cpp
-  Generating Code...
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(158,30): warning C4100: 'param': unreferenced formal parameter
   AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
