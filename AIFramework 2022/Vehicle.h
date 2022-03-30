@@ -64,9 +64,9 @@ protected: // preotected properties
 	float     m_mass         = 1.0f;
 	Vector2D  m_velocity;
 	Vector2D  m_acceleration;
-	float     m_maxForce     = 500.0f;
-	float     m_maxSpeed     = 100.0f;
-	float     m_deceleration = 0.5f;
+	float     m_maxForce     = 50.0f;
+	float     m_maxSpeed     = 50.0f;
+	float     m_deceleration = 0.75f;
 	state     m_currentState = state::Idle;
 	float     m_fuel		 = 10000.0f;
 	float     m_fuelMax      = 10000.0f;

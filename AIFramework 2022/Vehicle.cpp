@@ -2,7 +2,7 @@
 
 HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, carColour colour)
 {
-	m_scale = XMFLOAT3(30, 20, 1);
+	m_scale = XMFLOAT3(20, 15, 1);
 
 	if (colour == carColour::redCar)
 	{

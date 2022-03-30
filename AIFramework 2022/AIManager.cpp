@@ -80,16 +80,16 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
 
 void AIManager::update(const float fDeltaTime)
 {
-    for (unsigned int i = 0; i < m_waypointManager.getWaypointCount(); i++) {
-        m_waypointManager.getWaypoint(i)->update(fDeltaTime);
-       // AddItemToDrawList(m_waypointManager.getWaypoint(i)); // if you uncomment this, it will display the waypoints
-    }
+    //for (unsigned int i = 0; i < m_waypointManager.getWaypointCount(); i++) {
+    //    m_waypointManager.getWaypoint(i)->update(fDeltaTime);
+    //    AddItemToDrawList(m_waypointManager.getWaypoint(i)); // if you uncomment this, it will display the waypoints
+    //}
 
     for (int i = 0; i < m_waypointManager.getQuadpointCount(); i++)
     {
         Waypoint* qp = m_waypointManager.getQuadpoint(i);
         qp->update(fDeltaTime);
-        //AddItemToDrawList(qp); // if you uncomment this, it will display the quad waypoints
+        AddItemToDrawList(qp); // if you uncomment this, it will display the quad waypoints
     }
 
     // update and display the pickups
@@ -99,17 +99,18 @@ void AIManager::update(const float fDeltaTime)
     }
 
 	// draw the waypoints nearest to the car
-	/*
-    Waypoint* wp = m_waypointManager.getNearestWaypoint(m_pCar->getPosition());
-	if (wp != nullptr)
-	{
-		vecWaypoints vwps = m_waypointManager.getNeighbouringWaypoints(wp);
-		for (Waypoint* wp : vwps)
-		{
-			AddItemToDrawList(wp);
-		}
-	}
-    */
+	//
+ //   Waypoint* wp = m_waypointManager.getNearestWaypoint(m_pCar->getPosition());
+	//if (wp != nullptr)
+	//{
+	//	vecWaypoints vwps = m_waypointManager.getNeighbouringWaypoints(wp);
+	//	for (Waypoint* wp : vwps)
+	//	{
+ //           wp->update(fDeltaTime);
+	//		AddItemToDrawList(wp);
+	//	}
+	//}
+ //   
 
     // update and draw the car (and check for pickup collisions)
 	if (m_pCar != nullptr)
@@ -133,9 +134,25 @@ void AIManager::update(const float fDeltaTime)
 
     if (!m_path.path.empty())
     {
-        for (Waypoint* wps : m_path.path)
+        for (int i = 0; i < m_path.path.size(); i++)
         {
-            AddItemToDrawList(wps);
+            if (m_path.path[i] != nullptr)
+            {
+                m_path.path[i]->update(fDeltaTime);
+                AddItemToDrawList(m_path.path[i]);
+            }
+        }
+    }
+
+    if (!m_fuelPath.path.empty())
+    {
+        for (int i = 0; i < m_fuelPath.path.size(); i++)
+        {
+            if (m_fuelPath.path[i] != nullptr)
+            {
+                m_fuelPath.path[i]->update(fDeltaTime);
+                AddItemToDrawList(m_fuelPath.path[i]);
+            }
         }
     }
 
@@ -425,7 +442,7 @@ void AIManager::handleStates()
                 Vector2D endPos = m_pCar2->getPosition();
 
                 //loops through vector to find any passengers
-                for (int i = 0; i <= m_pickups.size(); i++)
+                for (int i = 0; i < m_pickups.size(); i++)
                 {
                     //if the object is a passenger, set its position to the end point
                     if (m_pickups[i]->getType() == pickuptype::Passenger)
@@ -440,14 +457,18 @@ void AIManager::handleStates()
 
             if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
-                for (int i = 0; i <= m_pickups.size(); i++)
+                for (int i = 0; i < m_pickups.size(); i++)
                 {
-                    //if the object is a passenger, set its position to the end point
+                    
                     if (m_pickups[i]->getType() == pickuptype::Fuel)
                     {
                         Vector2D endPos = m_pickups[i]->getPosition();
                         m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
-                        break;
+                    }
+                    else if (m_pickups[i]->getType() == pickuptype::Passenger)
+                    {
+                        Vector2D endPos = m_pickups[i]->getPosition();
+                        m_path = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
                     }
                 }
                 if (m_fuelPath.distance < m_path.distance)
@@ -455,13 +476,13 @@ void AIManager::handleStates()
                     m_pCar2->setState(state::CollectFuel);
                     break;
                 }
-                if (m_path.path.size() > 0 && m_path.path.size() != 1)
+                else if (m_path.path.size() > 0 && m_path.path.size() != 1)
                 {
                     Waypoint* nextPoint = m_path.path[m_path.path.size() - 1];
                     m_pCar2->setPositionTo(nextPoint->getPosition());
                     m_pCar2->getMovementManager()->Seek();
                 }
-                if (m_path.path.size() == 1)
+                else if (m_path.path.size() == 1)
                 {
                     Waypoint* finalPoint = m_path.path[m_path.path.size() - 1];
                     m_pCar2->setPositionTo(finalPoint->getPosition());
@@ -474,15 +495,15 @@ void AIManager::handleStates()
         }
         case state::CollectFuel:
         {
-            if (m_path.path.empty() && !m_pickups.empty())
+            if (m_fuelPath.path.empty() && !m_pickups.empty())
             {
-                //defaults the end position to the cars current position if there is no passengers to pick up
+                //defaults the end position to the cars current position if there is no fuel to pick up
                 Vector2D endPos = m_pCar2->getPosition();
 
-                //loops through vector to find any passengers
+                //loops through vector to find any fuel
                 for (int i = 0; i <= m_pickups.size(); i++)
                 {
-                    //if the object is a passenger, set its position to the end point
+                    //if the object is fuel, set its position to the end point
                     if (m_pickups[i]->getType() == pickuptype::Fuel)
                     {
                         endPos = m_pickups[i]->getPosition();
@@ -490,18 +511,24 @@ void AIManager::handleStates()
                     }
                 }
 
-                m_path = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
+                m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
             }
 
             if (m_pCar2->getCurrentSpeed() == 0.0f || (m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
             {
                 for (int i = 0; i <= m_pickups.size(); i++)
                 {
-                    //if the object is a passenger, set its position to the end point
+                    //if the object is a fuel, set its position to the end point
                     if (m_pickups[i]->getType() == pickuptype::Fuel)
                     {
                         Vector2D endPos = m_pickups[i]->getPosition();
                         m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
+                        break;
+                    }
+                    else if (m_pickups[i]->getType() == pickuptype::Passenger)
+                    {
+                        Vector2D endPos = m_pickups[i]->getPosition();
+                        m_path = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), endPos);
                         break;
                     }
                 }
@@ -510,21 +537,21 @@ void AIManager::handleStates()
                     m_pCar2->setState(state::Pathfinding);
                     break;
                 }
-                if (m_path.path.size() > 0 && m_path.path.size() != 1)
+                if (m_fuelPath.path.size() > 0 && m_fuelPath.path.size() != 1)
                 {
-                    Waypoint* nextPoint = m_path.path[m_path.path.size() - 1];
+                    Waypoint* nextPoint = m_fuelPath.path[m_fuelPath.path.size() - 1];
                     m_pCar2->setPositionTo(nextPoint->getPosition());
                     m_pCar2->getMovementManager()->Seek();
                 }
-                if (m_path.path.size() == 1)
+                if (m_fuelPath.path.size() == 1)
                 {
-                    Waypoint* finalPoint = m_path.path[m_path.path.size() - 1];
+                    Waypoint* finalPoint = m_fuelPath.path[m_fuelPath.path.size() - 1];
                     m_pCar2->setPositionTo(finalPoint->getPosition());
                     m_pCar2->getMovementManager()->Arrive();
                 }
             }
-            if ((m_pCar2->getPosition() - m_path.path[m_path.path.size() - 1]->getPosition()).Length() <= m_deadZone)
-                m_path.path.pop_back();
+            if ((m_pCar2->getPosition() - m_fuelPath.path[m_fuelPath.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                m_fuelPath.path.pop_back();
             break;
         }
         default:

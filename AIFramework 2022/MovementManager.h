@@ -18,6 +18,6 @@ public:
 
 private:
 	Vehicle* m_car = nullptr;
-	float    m_decelerationDistance = 250.0f;
+	float    m_decelerationDistance = 150.0f;
 };
 

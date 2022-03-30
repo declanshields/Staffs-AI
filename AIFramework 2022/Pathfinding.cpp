@@ -203,7 +203,6 @@ Path Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 
 	while (came_from[current] != current)
 	{
-		returnPath.distance += cost_so_far[current];
 		Waypoint* temp = came_from[current];
 
 		path.push_back(temp);
@@ -211,6 +210,8 @@ Path Pathfinding::AStar(Vector2D startPos, Vector2D endPos)
 	}
 
 	returnPath.path = path;
+	returnPath.distance = cost_so_far[goal];
+
 	current = nullptr;
 
 	return returnPath;

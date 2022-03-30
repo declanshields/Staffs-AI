@@ -34,7 +34,7 @@ private:
 	WaypointManager			m_waypointManager;
 
 	      float m_deceleration = 0.5f;
-	const float m_deadZone     = 50.0f;
+	const float m_deadZone     = 30.0f;
 
 	Path m_path;
 	Path m_fuelPath;

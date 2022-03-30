@@ -5,7 +5,7 @@ HRESULT	Waypoint::init(ID3D11Device* pd3dDevice, bool isOnTrack, bool checkPoint
 	m_checkpointID = checkPointID;
 	m_isOnTrack = isOnTrack;
 
-	float s = 10;
+	float s = 3;
 	m_scale = XMFLOAT3(s, s, s);
 
 	if (m_isOnTrack)
