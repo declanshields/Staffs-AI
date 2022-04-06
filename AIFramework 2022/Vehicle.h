@@ -5,6 +5,9 @@
 #include "Collidable.h"
 #include "MovementManager.h"
 #include "Pathfinding.h"
+#include "FiniteSM.h"
+
+#define MAXSPEED 50.0f
 
 
 enum class carColour
@@ -34,26 +37,32 @@ public:
 	virtual HRESULT  initMesh(ID3D11Device* pd3dDevice, carColour colour);
 	virtual void     update(const float deltaTime);
 
-	void             setMaxSpeed(const float maxSpeed) { m_maxSpeed = maxSpeed; }
+	void             setMaxSpeed(const float maxSpeed) { m_maxSpeed = MAXSPEED; }
 	void             setCurrentSpeed(const float speed);       // a ratio: a value between 0 and 1 (1 being max speed)
 	void             setPositionTo(Vector2D positionTo);       // a position to move to
 	void             setVehiclePosition(Vector2D position);    // the current position - this resets positionTo
 	void             setWaypointManager(WaypointManager* wpm);
 	void             setAcceleration(Vector2D force) { m_acceleration = force / m_mass; }
 	void             hasCollided() {}
-	void             setFuel() { m_fuel = m_fuelMax; }
+	void             setFuel() { m_fuel = m_fuelMax; m_maxSpeed = MAXSPEED; }
+	void             setStateMachine(FiniteSM* stateMachine) { m_stateMachine = stateMachine; }
+	
 	Vector2D         getPositionTo() { return m_positionTo; }  // returns the position the car is moving towards
-
 	float            getCurrentSpeed()      { return m_currentSpeed; }
 	float            getMaxSpeed()          { return m_maxSpeed; }
 	float            getFuelLeft()          { return m_fuel; }
 	Vector2D         getVelocity()          { return m_velocity; }
 	Pathfinding*     getPathfinderManager() { return m_pathfinding; }
+	WaypointManager* getWaypointManager()   { return m_waypointManager; }
 	MovementManager* getMovementManager()   { return m_movementManager; }
+	FiniteSM*        getStateMachine()      { return m_stateMachine; }
 
 	//function for setting state
 	void  setState(state newState) { m_currentState = newState; }
 	state getState()               { return m_currentState; }
+
+	Path m_fuelPath;
+	Path m_passengerPath;
 
 protected: // protected methods
 
@@ -67,7 +76,7 @@ protected: // preotected properties
 	float     m_maxForce     = 50.0f;
 	float     m_maxSpeed     = 50.0f;
 	float     m_deceleration = 0.75f;
-	state     m_currentState = state::Idle;
+	state     m_currentState = state::Pathfinding;
 	float     m_fuel		 = 10000.0f;
 	float     m_fuelMax      = 10000.0f;
 	
@@ -78,4 +87,5 @@ protected: // preotected properties
 	WaypointManager* m_waypointManager;
 	Pathfinding*     m_pathfinding;
 	MovementManager* m_movementManager;
+	FiniteSM*        m_stateMachine;
 };

@@ -49,7 +49,10 @@ void Vehicle::update(const float deltaTime)
 
 	m_fuel -= diff.Length();
 	if (m_fuel <= 0.0f)
+	{
 		m_fuel = 0.0f;
+		m_maxSpeed = 10.0f;
+	}
 
 	DrawableGameObject::update(deltaTime);
 }

@@ -22,6 +22,8 @@
     <ClCompile Include="CollisionHelper.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="MovementManager.cpp" />
+    <ClCompile Include="BehaviourTree.cpp" />
+    <ClCompile Include="FiniteSM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIManager.h" />
@@ -58,6 +60,8 @@
     <ClInclude Include="structs.h" />
     <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="MovementManager.h" />
+    <ClInclude Include="BehaviourTree.h" />
+    <ClInclude Include="FiniteSM.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\blue.dds">

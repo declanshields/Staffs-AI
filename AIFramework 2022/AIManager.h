@@ -36,11 +36,6 @@ private:
 	      float m_deceleration = 0.5f;
 	const float m_deadZone     = 30.0f;
 
-	Path m_path;
-	Path m_fuelPath;
-
-	bool m_clear             = false;
-
 	//time points to store the start and end points of the timer
 	chrono::time_point<chrono::system_clock> start, end;
 };

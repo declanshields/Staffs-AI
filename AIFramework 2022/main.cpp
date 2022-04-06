@@ -90,6 +90,7 @@ int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         return 0;
     }
 
+    srand(time(NULL));
 
     // Main message loop
     MSG msg = {0};
