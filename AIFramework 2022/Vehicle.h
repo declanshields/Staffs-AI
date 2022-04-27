@@ -5,7 +5,6 @@
 #include "Collidable.h"
 #include "MovementManager.h"
 #include "Pathfinding.h"
-#include "FiniteSM.h"
 
 #define MAXSPEED 50.0f
 
@@ -45,7 +44,6 @@ public:
 	void             setAcceleration(Vector2D force) { m_acceleration = force / m_mass; }
 	void             hasCollided() {}
 	void             setFuel() { m_fuel = m_fuelMax; m_maxSpeed = MAXSPEED; }
-	void             setStateMachine(FiniteSM* stateMachine) { m_stateMachine = stateMachine; }
 	
 	Vector2D         getPositionTo() { return m_positionTo; }  // returns the position the car is moving towards
 	float            getCurrentSpeed()      { return m_currentSpeed; }
@@ -55,7 +53,6 @@ public:
 	Pathfinding*     getPathfinderManager() { return m_pathfinding; }
 	WaypointManager* getWaypointManager()   { return m_waypointManager; }
 	MovementManager* getMovementManager()   { return m_movementManager; }
-	FiniteSM*        getStateMachine()      { return m_stateMachine; }
 
 	//function for setting state
 	void  setState(state newState) { m_currentState = newState; }
@@ -87,5 +84,4 @@ protected: // preotected properties
 	WaypointManager* m_waypointManager;
 	Pathfinding*     m_pathfinding;
 	MovementManager* m_movementManager;
-	FiniteSM*        m_stateMachine;
 };

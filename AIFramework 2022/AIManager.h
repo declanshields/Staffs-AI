@@ -21,7 +21,7 @@ public:
 	void	 mouseUp(int x, int y);
 	void	 keyDown(WPARAM param);
 	void	 keyUp(WPARAM param);
-	void     handleStates();
+	void     StateMachine();
 
 protected:
 	bool	 checkForCollisions(Vehicle* car);

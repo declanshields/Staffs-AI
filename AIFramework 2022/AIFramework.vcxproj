@@ -361,12 +361,10 @@
   <ItemGroup>
     <ClCompile Include="AIManager.cpp" />
     <ClCompile Include="Background.cpp" />
-    <ClCompile Include="BehaviourTree.cpp" />
     <ClCompile Include="Collidable.cpp" />
     <ClCompile Include="CollisionHelper.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DrawableGameObject.cpp" />
-    <ClCompile Include="FiniteSM.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -380,13 +378,11 @@
   <ItemGroup>
     <ClInclude Include="AIManager.h" />
     <ClInclude Include="Background.h" />
-    <ClInclude Include="BehaviourTree.h" />
     <ClInclude Include="Collidable.h" />
     <ClInclude Include="CollisionHelper.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DrawableGameObject.h" />
-    <ClInclude Include="FiniteSM.h" />
     <ClInclude Include="main.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>

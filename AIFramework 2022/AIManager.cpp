@@ -74,8 +74,8 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
     setRandomPickupPosition(pPickupPassenger);
     setRandomPickupPosition(pFuel);
 
-    m_pCar->setStateMachine(new FiniteSM(m_pCar, m_pCar2, m_pickups));
-    m_pCar2->setStateMachine(new FiniteSM(m_pCar2, m_pCar, m_pickups));
+    m_pCar->setState(state::Idle);
+    m_pCar2->setState(state::Pathfinding);
 
     return hr;
 }
@@ -88,12 +88,12 @@ void AIManager::update(const float fDeltaTime)
     //    AddItemToDrawList(m_waypointManager.getWaypoint(i)); // if you uncomment this, it will display the waypoints
     //}
 
-    for (int i = 0; i < m_waypointManager.getQuadpointCount(); i++)
-    {
-        Waypoint* qp = m_waypointManager.getQuadpoint(i);
-        qp->update(fDeltaTime);
-        AddItemToDrawList(qp); // if you uncomment this, it will display the quad waypoints
-    }
+    //for (int i = 0; i < m_waypointManager.getQuadpointCount(); i++)
+    //{
+    //    Waypoint* qp = m_waypointManager.getQuadpoint(i);
+    //    qp->update(fDeltaTime);
+    //    AddItemToDrawList(qp); // if you uncomment this, it will display the quad waypoints
+    //}
 
     // update and display the pickups
     for (unsigned int i = 0; i < m_pickups.size(); i++) {
@@ -183,9 +183,7 @@ void AIManager::update(const float fDeltaTime)
         }
     }
 
-    //update cars based off current state
-    m_pCar->getStateMachine()->StateMachine();
-    m_pCar2->getStateMachine()->StateMachine();
+    StateMachine();
 }
 
 void AIManager::mouseUp(int x, int y)
@@ -278,6 +276,377 @@ void AIManager::keyDown(WPARAM param)
         // etc
         default:
             break;
+    }
+}
+
+void AIManager::StateMachine()
+{
+    if (m_pCar != nullptr && m_pCar2 != nullptr)
+    {
+        state currentState = m_pCar->getState();
+
+        switch (currentState)
+        {
+        case state::Arrive:
+        {
+            //If car is at its destination
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+            {
+                //Generate new destination
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D destination(x, y);
+
+                m_pCar->setPositionTo(m_pCar->getWaypointManager()->getNearestWaypoint(destination)->getPosition());
+            }
+            //Arrive at the destination
+            m_pCar->getMovementManager()->Arrive();
+            break;
+        }
+        case state::Pursuit:
+        {
+            //Pursue the other car
+            m_pCar->getMovementManager()->Pursuit(m_pCar2);
+            break;
+        }
+        case state::Seek:
+        {
+            //If car is at its destination
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+            {
+                //Generate new destination
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D destination(x, y);
+
+                m_pCar->setPositionTo(m_pCar->getWaypointManager()->getNearestWaypoint(destination)->getPosition());
+            }
+            //Seek to destination
+            m_pCar->getMovementManager()->Seek();
+            break;
+        }
+        case state::MouseSeek:
+        {
+            //Works the same way as Seek, but does not generate a new destination
+            if ((m_pCar->getPosition() - m_pCar->getPositionTo()).Length() <= m_deadZone)
+            {
+                //If already at destination, set state to pathfinding
+                m_pCar->setState(state::Pathfinding);
+            }
+            else
+                m_pCar->getMovementManager()->Seek();
+            break;
+        }
+        case state::Evade:
+        {
+            //Evade the second car
+            m_pCar->getMovementManager()->Evade(m_pCar2);
+            break;
+        }
+        case state::Flee:
+        {
+            //Calculate distance between the two cars
+            Vector2D length;
+            length.x = (m_pCar2->getPosition().x - m_pCar->getPosition().x);
+            length.y = (m_pCar2->getPosition().y - m_pCar->getPosition().y);
+
+            //If the distance is less than the acceptable distance (300)
+            if (length.Length() <= m_deadZone)
+            {
+                //Set the car to go in the opposite direction of the other car
+                m_pCar->setPositionTo(m_pCar->getPosition() - m_pCar2->getPosition());
+                m_pCar->getMovementManager()->Flee();
+            }
+            else
+            {
+                //Else, set the car's state to Pathfinding
+                m_pCar->setPositionTo(m_pCar->getPosition());
+                m_pCar->setState(state::Pathfinding);
+            }
+            break;
+        }
+        case state::Wander:
+        {
+            //Make the car wander around
+            m_pCar->getMovementManager()->Wander();
+            break;
+        }
+        case state::ObstacleAvoid:
+        {
+            break;
+        }
+        case state::Idle:
+        {
+            //Make the car stay at its current position
+            m_pCar->setPositionTo(m_pCar->getPosition());
+            m_pCar->getMovementManager()->Seek();
+
+            break;
+        }
+        case state::Pathfinding:
+        {
+            Vector2D fuelPos, passengerPos;
+            //Check to see if paths are empty, and pickups is not
+            if ((m_pCar->m_fuelPath.path.empty() && m_pCar->m_passengerPath.path.empty()) && !m_pickups.empty())
+            {
+
+                //Loop through pickups and get the position of the fuel and passenger
+                for (int i = 0; i < m_pickups.size(); i++)
+                {
+                    if (m_pickups[i]->getType() == pickuptype::Fuel)
+                    {
+                        fuelPos = m_pickups[i]->getPosition();
+                    }
+                    if (m_pickups[i]->getType() == pickuptype::Passenger)
+                    {
+                        passengerPos = m_pickups[i]->getPosition();
+                    }
+                }
+
+                //Create paths
+                m_pCar->m_fuelPath = m_pCar->getPathfinderManager()->AStar(m_pCar->getPosition(), fuelPos);
+                m_pCar->m_passengerPath = m_pCar->getPathfinderManager()->AStar(m_pCar->getPosition(), passengerPos);
+            }
+            if (!m_pCar->m_fuelPath.path.empty() && !m_pCar->m_passengerPath.path.empty())
+            {
+                //Check to see which pickup is closer
+                //If fuel is closer
+                if (m_pCar->m_fuelPath.distance < m_pCar->m_passengerPath.distance)
+                {
+                    //Check to see if there is more than 1 node left
+                    if (m_pCar->m_fuelPath.path.size() > 0 && m_pCar->m_fuelPath.path.size() != 1)
+                    {
+                        //If more than one node left, seek to the next node
+                        Waypoint* nextPoint = m_pCar->m_fuelPath.path[m_pCar->m_fuelPath.path.size() - 1];
+                        m_pCar->setPositionTo(nextPoint->getPosition());
+                        m_pCar->getMovementManager()->Seek();
+                    }
+                    else
+                    {
+                        //If only one node left, arrive at last node
+                        Waypoint* finalPoint = m_pCar->m_fuelPath.path[m_pCar->m_fuelPath.path.size() - 1];
+                        m_pCar->setPositionTo(finalPoint->getPosition());
+                        m_pCar->getMovementManager()->Arrive();
+                    }
+
+                    //If car's position is the current node, get next node
+                    if ((m_pCar->getPosition() - m_pCar->m_fuelPath.path[m_pCar->m_fuelPath.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                    {
+                        m_pCar->m_fuelPath.path.pop_back();
+                    }
+                }
+                else
+                {
+                    //Check to see if there is more than 1 node left
+                    if (m_pCar->m_passengerPath.path.size() > 0 && m_pCar->m_passengerPath.path.size() != 1)
+                    {
+                        //If more than one node left, seek to the next node
+                        Waypoint* nextPoint = m_pCar->m_passengerPath.path[m_pCar->m_passengerPath.path.size() - 1];
+                        m_pCar->setPositionTo(nextPoint->getPosition());
+                        m_pCar->getMovementManager()->Seek();
+                    }
+                    else
+                    {
+                        //If only one node left, arrive at last node
+                        Waypoint* finalPoint = m_pCar->m_passengerPath.path[m_pCar->m_passengerPath.path.size() - 1];
+                        m_pCar->setPositionTo(finalPoint->getPosition());
+                        m_pCar->getMovementManager()->Arrive();
+                    }
+
+                    //If car's position is the current node, get next node
+                    if ((m_pCar->getPosition() - m_pCar->m_passengerPath.path[m_pCar->m_passengerPath.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                    {
+                        m_pCar->m_passengerPath.path.pop_back();
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
+
+        currentState = m_pCar2->getState();
+
+        switch (currentState)
+        {
+        case state::Arrive:
+        {
+            //If car is at its destination
+            if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
+                //Generate new destination
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D destination(x, y);
+
+                m_pCar2->setPositionTo(m_pCar->getWaypointManager()->getNearestWaypoint(destination)->getPosition());
+            }
+            //Arrive at the destination
+            m_pCar2->getMovementManager()->Arrive();
+            break;
+        }
+        case state::Pursuit:
+        {
+            //Pursue the other car
+            m_pCar2->getMovementManager()->Pursuit(m_pCar);
+            break;
+        }
+        case state::Seek:
+        {
+            //If car is at its destination
+            if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
+                //Generate new destination
+                int x = (rand() % SCREEN_WIDTH) - (SCREEN_WIDTH / 2);
+                int y = (rand() % SCREEN_HEIGHT) - (SCREEN_HEIGHT / 2);
+                Vector2D destination(x, y);
+
+                m_pCar2->setPositionTo(m_pCar->getWaypointManager()->getNearestWaypoint(destination)->getPosition());
+            }
+            //Seek to destination
+            m_pCar2->getMovementManager()->Seek();
+            break;
+        }
+        case state::MouseSeek:
+        {
+            //Works the same way as Seek, but does not generate a new destination
+            if ((m_pCar2->getPosition() - m_pCar2->getPositionTo()).Length() <= m_deadZone)
+            {
+                //If already at destination, set state to pathfinding
+                m_pCar2->setState(state::Pathfinding);
+            }
+            else
+                m_pCar2->getMovementManager()->Seek();
+            break;
+        }
+        case state::Evade:
+        {
+            //Evade the second car
+            m_pCar2->getMovementManager()->Evade(m_pCar);
+            break;
+        }
+        case state::Flee:
+        {
+            //Calculate distance between the two cars
+            Vector2D length;
+            length.x = (m_pCar->getPosition().x - m_pCar2->getPosition().x);
+            length.y = (m_pCar->getPosition().y - m_pCar2->getPosition().y);
+
+            //If the distance is less than the acceptable distance (300)
+            if (length.Length() <= m_deadZone)
+            {
+                //Set the car to go in the opposite direction of the other car
+                m_pCar2->setPositionTo(m_pCar->getPosition() - m_pCar->getPosition());
+                m_pCar2->getMovementManager()->Flee();
+            }
+            else
+            {
+                //Else, set the car's state to Pathfinding
+                m_pCar2->setPositionTo(m_pCar->getPosition());
+                m_pCar2->setState(state::Pathfinding);
+            }
+            break;
+        }
+        case state::Wander:
+        {
+            //Make the car wander around
+            m_pCar2->getMovementManager()->Wander();
+            break;
+        }
+        case state::ObstacleAvoid:
+        {
+            break;
+        }
+        case state::Idle:
+        {
+            //Make the car stay at its current position
+            m_pCar2->setPositionTo(m_pCar->getPosition());
+            m_pCar2->getMovementManager()->Seek();
+
+            break;
+        }
+        case state::Pathfinding:
+        {
+            Vector2D fuelPos, passengerPos;
+            //Check to see if paths are empty, and pickups is not
+            if ((m_pCar2->m_fuelPath.path.empty() || m_pCar2->m_passengerPath.path.empty()) && !m_pickups.empty())
+            {
+                //Loop through pickups and get the position of the fuel and passenger
+                for (int i = 0; i < m_pickups.size(); i++)
+                {
+                    if (m_pickups[i]->getType() == pickuptype::Fuel)
+                    {
+                        fuelPos = m_pickups[i]->getPosition();
+                    }
+                    if (m_pickups[i]->getType() == pickuptype::Passenger)
+                    {
+                        passengerPos = m_pickups[i]->getPosition();
+                    }
+                }
+               
+                //Create paths
+                m_pCar2->m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), fuelPos);
+                m_pCar2->m_passengerPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), passengerPos);
+            }
+            if (!m_pCar->m_fuelPath.path.empty() && !m_pCar->m_passengerPath.path.empty())
+            {
+                //Check to see which pickup is closer
+                //If fuel is closer
+                if (m_pCar2->m_fuelPath.distance < m_pCar2->m_passengerPath.distance)
+                {
+                    //Check to see if there is more than 1 node left
+                    if (m_pCar2->m_fuelPath.path.size() != 1)
+                    {
+                        //If more than one node left, seek to the next node
+                        Waypoint* nextPoint = m_pCar2->m_fuelPath.path[m_pCar2->m_fuelPath.path.size() - 1];
+                        m_pCar2->setPositionTo(nextPoint->getPosition());
+                        m_pCar2->getMovementManager()->Seek();
+                    }
+                    else
+                    {
+                        //If only one node left, arrive at last node
+                        Waypoint* finalPoint = m_pCar2->m_fuelPath.path[0];
+                        m_pCar2->setPositionTo(finalPoint->getPosition());
+                        m_pCar2->getMovementManager()->Arrive();
+                    }
+
+                    //If car's position is the current node, get next node
+                    if ((m_pCar2->getPosition() - m_pCar2->m_fuelPath.path[m_pCar2->m_fuelPath.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                    {
+                        m_pCar2->m_fuelPath.path.pop_back();
+                    }
+                }
+                else
+                {
+                    //Check to see if there is more than 1 node left
+                    if (m_pCar2->m_passengerPath.path.size() > 0 && m_pCar2->m_passengerPath.path.size() != 1)
+                    {
+                        //If more than one node left, seek to the next node
+                        Waypoint* nextPoint = m_pCar2->m_passengerPath.path[m_pCar2->m_passengerPath.path.size() - 1];
+                        m_pCar2->setPositionTo(nextPoint->getPosition());
+                        m_pCar2->getMovementManager()->Seek();
+                    }
+                    else
+                    {
+                        //If only one node left, arrive at last node
+                        Waypoint* finalPoint = m_pCar2->m_passengerPath.path[m_pCar2->m_passengerPath.path.size() - 1];
+                        m_pCar2->setPositionTo(finalPoint->getPosition());
+                        m_pCar2->getMovementManager()->Arrive();
+                    }
+
+                    //If car's position is the current node, get next node
+                    if ((m_pCar2->getPosition() - m_pCar2->m_passengerPath.path[m_pCar2->m_passengerPath.path.size() - 1]->getPosition()).Length() <= m_deadZone)
+                    {
+                        m_pCar2->m_passengerPath.path.pop_back();
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
     }
 }
 
