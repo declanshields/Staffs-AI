@@ -1,1 +1,3 @@
-﻿  AIFramework.vcxproj -> D:\Github\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
+﻿  FiniteSM.cpp
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Vehicle.h(40,43): warning C4100: 'maxSpeed': unreferenced formal parameter
+  AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
