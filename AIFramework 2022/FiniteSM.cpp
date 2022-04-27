@@ -120,12 +120,12 @@ void FiniteSM::StateMachine()
 		case state::Pathfinding:
 		{
 			//Check to see if paths are empty, and pickups is not
-			if ((m_car->m_fuelPath.path.empty() && m_car->m_passengerPath.path.empty()) && !m_items.empty())
+			if ((m_car->m_fuelPath.path.empty() && m_car->m_passengerPath.path.empty()) && !m_items->empty())
 			{
 				Vector2D fuelPos, passengerPos;
 
 				//Loop through pickups and get the position of the fuel and passenger
-				for (int i = 0; i < m_items.size(); i++)
+				for (int i = 0; i < m_items->size(); i++)
 				{
 					if (m_items[i]->getType() == pickuptype::Fuel)
 					{
@@ -145,7 +145,7 @@ void FiniteSM::StateMachine()
 				if (m_car->getCurrentSpeed() == 0.0f || (m_car->getPosition() - m_car->getPositionTo()).Length() <= m_deadzone)
 				{
 					//Generate the paths again
-					for (int i = 0; i < m_items.size(); i++)
+					for (int i = 0; i < m_items->size(); i++)
 					{
 						if (m_items[i]->getType() == pickuptype::Fuel)
 						{

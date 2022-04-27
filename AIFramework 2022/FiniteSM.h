@@ -4,8 +4,6 @@
 class Vehicle;
 class PickupItem;
 
-using namespace std;
-
 typedef vector<PickupItem*> vecPickups;
 
 class FiniteSM
@@ -26,6 +24,6 @@ private:
 	
 	float m_acceptableDistance = 300.0f;
 
-	vecPickups m_items;
+	vecPickups* m_items;
 };
 
