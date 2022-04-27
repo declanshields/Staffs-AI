@@ -119,11 +119,10 @@ void FiniteSM::StateMachine()
 		}
 		case state::Pathfinding:
 		{
-			Vector2D fuelPos, passengerPos;
-
 			//Check to see if paths are empty, and pickups is not
 			if ((m_car->m_fuelPath.path.empty() && m_car->m_passengerPath.path.empty()) && !m_items.empty())
 			{
+				Vector2D fuelPos, passengerPos;
 
 				//Loop through pickups and get the position of the fuel and passenger
 				for (int i = 0; i < m_items.size(); i++)
@@ -142,91 +141,75 @@ void FiniteSM::StateMachine()
 				m_car->m_fuelPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), fuelPos);
 				m_car->m_passengerPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), passengerPos);
 
-				if (m_car->m_fuelPath.distance < m_car->m_passengerPath.distance && m_car->m_fuelPath.path.size() != 0)
+				//Check to see if the car is at the next node
+				if (m_car->getCurrentSpeed() == 0.0f || (m_car->getPosition() - m_car->getPositionTo()).Length() <= m_deadzone)
 				{
-					Waypoint* nextPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
-					m_car->setPositionTo(nextPoint->getPosition());
-					m_car->getMovementManager()->Seek();
-				}
-				else
-				{
-					Waypoint* nextPoint = m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1];
-					m_car->setPositionTo(nextPoint->getPosition());
-					m_car->getMovementManager()->Seek();
-
-				}
-			}
-
-			//Check to see if the car is at the next node
-			if ((m_car->getPosition() - m_car->getPositionTo()).Length() <= m_deadzone)
-			{
-				//Generate the paths again
-				for (int i = 0; i < m_items.size(); i++)
-				{
-					if (m_items[i]->getType() == pickuptype::Fuel)
+					//Generate the paths again
+					for (int i = 0; i < m_items.size(); i++)
 					{
-						fuelPos = m_items[i]->getPosition();
+						if (m_items[i]->getType() == pickuptype::Fuel)
+						{
+							fuelPos = m_items[i]->getPosition();
+						}
+						if (m_items[i]->getType() == pickuptype::Passenger)
+						{
+							passengerPos = m_items[i]->getPosition();
+						}
 					}
-					if (m_items[i]->getType() == pickuptype::Passenger)
-					{
-						passengerPos = m_items[i]->getPosition();
-					}
-				}
 
-				//Create paths
-				m_car->m_fuelPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), fuelPos);
-				m_car->m_passengerPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), passengerPos);
+					//Create paths
+					m_car->m_fuelPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), fuelPos);
+					m_car->m_passengerPath = m_car->getPathfinderManager()->AStar(m_car->getPosition(), passengerPos);
 
-				//Check to see which pickup is closer
-				//If fuel is closer
-				if (m_car->m_fuelPath.distance < m_car->m_passengerPath.distance)
-				{
-					//Check to see if there is more than 1 node left
-					if (m_car->m_fuelPath.path.size() > 0 && m_car->m_fuelPath.path.size() != 1)
+					//Check to see which pickup is closer
+					//If fuel is closer
+					if (m_car->m_fuelPath.distance < m_car->m_passengerPath.distance)
 					{
-						//If more than one node left, seek to the next node
-						Waypoint* nextPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
-						m_car->setPositionTo(nextPoint->getPosition());
-						m_car->getMovementManager()->Seek();
+						//Check to see if there is more than 1 node left
+						if (m_car->m_fuelPath.path.size() > 0 && m_car->m_fuelPath.path.size() != 1)
+						{
+							//If more than one node left, seek to the next node
+							Waypoint* nextPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
+							m_car->setPositionTo(nextPoint->getPosition());
+							m_car->getMovementManager()->Seek();
+						}
+						else
+						{
+							//If only one node left, arrive at last node
+							Waypoint* finalPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
+							m_car->setPositionTo(finalPoint->getPosition());
+							m_car->getMovementManager()->Arrive();
+						}
+
+						//If car's position is the current node, get next node
+						if ((m_car->getPosition() - m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1]->getPosition()).Length() <= m_deadzone)
+						{
+							m_car->m_fuelPath.path.pop_back();
+						}
 					}
 					else
 					{
-						//If only one node left, arrive at last node
-						Waypoint* finalPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
-						m_car->setPositionTo(finalPoint->getPosition());
-						m_car->getMovementManager()->Arrive();
-					}
+						//Check to see if there is more than 1 node left
+						if (m_car->m_passengerPath.path.size() > 0 && m_car->m_passengerPath.path.size() != 1)
+						{
+							//If more than one node left, seek to the next node
+							Waypoint* nextPoint = m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1];
+							m_car->setPositionTo(nextPoint->getPosition());
+							m_car->getMovementManager()->Seek();
+						}
+						else
+						{
+							//If only one node left, arrive at last node
+							Waypoint* finalPoint = m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1];
+							m_car->setPositionTo(finalPoint->getPosition());
+							m_car->getMovementManager()->Arrive();
+						}
 
-					//If car's position is the current node, get next node
-					if ((m_car->getPosition() - m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1]->getPosition()).Length() <= m_deadzone)
-					{
-						m_car->m_fuelPath.path.pop_back();
-						Waypoint* nextPoint = m_car->m_fuelPath.path[m_car->m_fuelPath.path.size() - 1];
-						m_car->setPositionTo(nextPoint->getPosition());
-					}
-				}
-				else
-				{
-					//Check to see if there is more than 1 node left
-					if (m_car->m_passengerPath.path.size() > 0 && m_car->m_passengerPath.path.size() != 1)
-					{
-						//If more than one node left, seek to the next node
-						Waypoint* nextPoint = m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1];
-						m_car->setPositionTo(nextPoint->getPosition());
-						m_car->getMovementManager()->Seek();
-					}
-					else
-					{
-						//If only one node left, arrive at last node
-						Waypoint* finalPoint = m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1];
-						m_car->setPositionTo(finalPoint->getPosition());
-						m_car->getMovementManager()->Arrive();
-					}
-
-					//If car's position is the current node, get next node
-					if ((m_car->getPosition() - m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1]->getPosition()).Length() <= m_deadzone)
-					{
-						m_car->m_passengerPath.path.pop_back();
+						//If car's position is the current node, get next node
+						if ((m_car->getPosition() - m_car->m_passengerPath.path[m_car->m_passengerPath.path.size() - 1]->getPosition()).Length() <= m_deadzone)
+						{
+							m_car->m_passengerPath.path.pop_back();
+						}
 					}
 				}
 			}
