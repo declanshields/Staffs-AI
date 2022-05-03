@@ -75,7 +75,7 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
     setRandomPickupPosition(pFuel);
 
     m_pCar->setState(state::Idle);
-    m_pCar2->setState(state::Pathfinding);
+    m_pCar2->setState(state::Idle);
 
     return hr;
 }
@@ -135,53 +135,58 @@ void AIManager::update(const float fDeltaTime)
         AddItemToDrawList(m_pCar2);
     }
 
-    if (!m_pCar->m_fuelPath.path.empty())
+    //Display the path the cars are currently taking
+    if(!m_pCar->m_fuelPath.path.empty() && !m_pCar->m_passengerPath.path.empty())
     {
-        for (int i = 0; i < m_pCar->m_fuelPath.path.size(); i++)
+        if (m_pCar->m_fuelPath.distance <= m_pCar->m_passengerPath.distance)
         {
-            if (m_pCar->m_fuelPath.path[i] != nullptr)
+            for (int i = 0; i < m_pCar->m_fuelPath.path.size(); i++)
             {
-                m_pCar->m_fuelPath.path[i]->update(fDeltaTime);
-                AddItemToDrawList(m_pCar->m_fuelPath.path[i]);
+                if (m_pCar->m_fuelPath.path[i] != nullptr)
+                {
+                    m_pCar->m_fuelPath.path[i]->update(fDeltaTime);
+                    AddItemToDrawList(m_pCar->m_fuelPath.path[i]);
+                }
             }
+        }
+        else
+        {
+            for (int i = 0; i < m_pCar->m_passengerPath.path.size(); i++)
+            {
+                if (m_pCar->m_passengerPath.path[i] != nullptr)
+                {
+                    m_pCar->m_passengerPath.path[i]->update(fDeltaTime);
+                    AddItemToDrawList(m_pCar->m_passengerPath.path[i]);
+                }
+            }
+        }
+    }
+    if (!m_pCar2->m_fuelPath.path.empty() && !m_pCar2->m_passengerPath.path.empty())
+    {
+	    if (m_pCar2->m_fuelPath.distance <= m_pCar2->m_passengerPath.distance)
+	    {
+		    for (int i = 0; i < m_pCar2->m_fuelPath.path.size(); i++)
+		    {
+			    if(m_pCar2->m_fuelPath.path[i] != nullptr)
+			    {
+                    m_pCar2->m_fuelPath.path[i]->update(fDeltaTime);
+                    AddItemToDrawList(m_pCar2->m_fuelPath.path[i]);
+			    }
+		    }
+	    }
+        else
+        {
+	        for (int i = 0; i < m_pCar2->m_passengerPath.path.size(); i++)
+	        {
+		        if(m_pCar2->m_passengerPath.path[i] != nullptr)
+		        {
+                    m_pCar2->m_passengerPath.path[i]->update(fDeltaTime);
+                    AddItemToDrawList(m_pCar2->m_passengerPath.path[i]);
+		        }
+	        }
         }
     }
 
-    if (!m_pCar->m_passengerPath.path.empty())
-    {
-        for (int i = 0; i < m_pCar->m_passengerPath.path.size(); i++)
-        {
-            if (m_pCar->m_passengerPath.path[i] != nullptr)
-            {
-                m_pCar->m_passengerPath.path[i]->update(fDeltaTime);
-                AddItemToDrawList(m_pCar->m_passengerPath.path[i]);
-            }
-        }
-    }
-
-    if (!m_pCar2->m_fuelPath.path.empty())
-    {
-        for (int i = 0; i < m_pCar->m_fuelPath.path.size(); i++)
-        {
-            if (m_pCar->m_fuelPath.path[i] != nullptr)
-            {
-                m_pCar->m_fuelPath.path[i]->update(fDeltaTime);
-                AddItemToDrawList(m_pCar->m_fuelPath.path[i]);
-            }
-        }
-    }
-
-    if (!m_pCar2->m_passengerPath.path.empty())
-    {
-        for (int i = 0; i < m_pCar->m_passengerPath.path.size(); i++)
-        {
-            if (m_pCar->m_passengerPath.path[i] != nullptr)
-            {
-                m_pCar->m_passengerPath.path[i]->update(fDeltaTime);
-                AddItemToDrawList(m_pCar->m_passengerPath.path[i]);
-            }
-        }
-    }
 
     StateMachine();
 }
@@ -359,9 +364,9 @@ void AIManager::StateMachine()
             }
             else
             {
-                //Else, set the car's state to Pathfinding
+                //Else, set the car's state to Idle
                 m_pCar->setPositionTo(m_pCar->getPosition());
-                m_pCar->setState(state::Pathfinding);
+                m_pCar->setState(state::Idle);
             }
             break;
         }
@@ -561,7 +566,7 @@ void AIManager::StateMachine()
         case state::Idle:
         {
             //Make the car stay at its current position
-            m_pCar2->setPositionTo(m_pCar->getPosition());
+            m_pCar2->setPositionTo(m_pCar2->getPosition());
             m_pCar2->getMovementManager()->Seek();
 
             break;
@@ -589,7 +594,7 @@ void AIManager::StateMachine()
                 m_pCar2->m_fuelPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), fuelPos);
                 m_pCar2->m_passengerPath = m_pCar2->getPathfinderManager()->AStar(m_pCar2->getPosition(), passengerPos);
             }
-            if (!m_pCar->m_fuelPath.path.empty() && !m_pCar->m_passengerPath.path.empty())
+            if (!m_pCar2->m_fuelPath.path.empty() && !m_pCar2->m_passengerPath.path.empty())
             {
                 //Check to see which pickup is closer
                 //If fuel is closer

@@ -1,6 +1,1 @@
-﻿  AIManager.cpp
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Vehicle.h(39,43): warning C4100: 'maxSpeed': unreferenced formal parameter
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(45,11): warning C4189: 'yPos2': local variable is initialized but not referenced
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(44,11): warning C4189: 'xPos2': local variable is initialized but not referenced
-C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp(201,30): warning C4100: 'param': unreferenced formal parameter
-  AIFramework.vcxproj -> C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
+﻿  AIFramework.vcxproj -> D:\Github\Staffs-AI\AIFramework 2022\x64\Debug\AIFramework.exe
