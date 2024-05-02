@@ -83,37 +83,11 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
 
 void AIManager::update(const float fDeltaTime)
 {
-    //for (unsigned int i = 0; i < m_waypointManager.getWaypointCount(); i++) {
-    //    m_waypointManager.getWaypoint(i)->update(fDeltaTime);
-    //    AddItemToDrawList(m_waypointManager.getWaypoint(i)); // if you uncomment this, it will display the waypoints
-    //}
-
-    //for (int i = 0; i < m_waypointManager.getQuadpointCount(); i++)
-    //{
-    //    Waypoint* qp = m_waypointManager.getQuadpoint(i);
-    //    qp->update(fDeltaTime);
-    //    AddItemToDrawList(qp); // if you uncomment this, it will display the quad waypoints
-    //}
-
     // update and display the pickups
     for (unsigned int i = 0; i < m_pickups.size(); i++) {
         m_pickups[i]->update(fDeltaTime);
         AddItemToDrawList(m_pickups[i]);
     }
-
-	// draw the waypoints nearest to the car
-	//
- //   Waypoint* wp = m_waypointManager.getNearestWaypoint(m_pCar->getPosition());
-	//if (wp != nullptr)
-	//{
-	//	vecWaypoints vwps = m_waypointManager.getNeighbouringWaypoints(wp);
-	//	for (Waypoint* wp : vwps)
-	//	{
- //           wp->update(fDeltaTime);
-	//		AddItemToDrawList(wp);
-	//	}
-	//}
- //   
 
     // update and draw the car (and check for pickup collisions)
 	if (m_pCar != nullptr)

@@ -1,0 +1,13 @@
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\AIManager.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\AIManager.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Background.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\Background.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Collidable.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\Collidable.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\CollisionHelper.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\CollisionHelper.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\DDSTextureLoader.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\DDSTextureLoader.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\DrawableGameObject.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\DrawableGameObject.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\main.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\main.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\MovementManager.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\MovementManager.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Pathfinding.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\Pathfinding.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\PickupItem.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\PickupItem.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Vehicle.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\Vehicle.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\Waypoint.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\Waypoint.obj
+C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\WaypointManager.cpp;C:\Users\s011459k\Documents\GitHub\Staffs-AI\AIFramework 2022\x64\Debug\WaypointManager.obj

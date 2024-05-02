@@ -2,7 +2,9 @@
 
 This is a repo that contains all work completed for the AI module during Semester 2 at Staffs Uni
 
-This project is for the creation of basic pathfinding AI that also implements some decision making.
+This project implements A star pathfinding to move between designated nodes within the framework. It also contains a state machine that calculates the distance between the passenger and fuel, and seeks to whichever is closer based on their path.
+
+The state machine also handles the behaviour of each car depending on which mode they are in, slowing their velocity if they are approaching the final node, or randomly selecting a point to "wander" to.
 
 Instructions
 
